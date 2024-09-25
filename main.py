@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 from bs4 import BeautifulSoup
 
-st.title("Stock Data Web Scraping")
+st.title("Stock Data")
 
 ticker = st.text_input("Enter your stock ticker:")
 
@@ -41,7 +41,7 @@ if st.button("Submit"):
           print(f"Forward PE: {forward_pe}")
           print(f"Ex-Dividend Date: {ex_dividend_date}")
 
-          st.subheader("Table 1: Stock Overview")
+          st.subheader("Stock Overview")
           st.write(f"Market Cap: {market_cap}")
           st.write(f"Revenue (ttm): {revenue_ttm}")
           st.write(f"Net Income (ttm): {net_income_ttm}")
@@ -83,7 +83,6 @@ if st.button("Submit"):
           print(f"SA Price Target: {price_target}")
           print(f"Earnings Date: {earnings_date}")
 
-          st.subheader("Table 2: Stock Overview")
           st.write(f"Volume: {volume}")
           st.write(f"Open: {open}")
           st.write(f"Previous Close: {previous_close}")
