@@ -10,6 +10,8 @@ st.set_page_config(
 
 @st.cache_data
 def get_stock_data(ticker):
+    lowercase_ticker = ticker.lower()
+    picture_url = "https://logos.stockanalysis.com/" + lowercase_ticker + ".svg"
     stock = yf.Ticker(ticker)
     data = stock.history(period='max')
 
@@ -31,7 +33,7 @@ def get_stock_data(ticker):
     change_dollar = price - previous_close
     change_percent = (change_dollar / previous_close) * 100
 
-    return price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap,longProfile, eps, pegRatio
+    return price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap,longProfile, eps, pegRatio, picture_url
 
 '''
 # :chart_with_upwards_trend: Stock Analysis Dashboard
@@ -46,21 +48,40 @@ ticker = st.text_input("Enter US Stock Ticker:", "AAPL")
 
 if st.button("Submit"):
     try:
-        price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio = get_stock_data(ticker)
+        price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url = get_stock_data(ticker)
 
         st.header(f'{name}', divider='gray')
-        profile_cols = st.columns(4)
+       
 
-        profile_cols[0].metric(label='Sector', value=f'{sector}')
-        profile_cols[1].metric(label='Industry', value=f'{industry}')
         employee_value = 'N/A' if employee == 'N/A' else f'{employee:,}'
-        profile_cols[2].metric(label='Employees', value=f'{employee_value}')
         marketCap_value = 'N/A' if marketCap == 'N/A' else f'${marketCap/1000000:,.2f}'
-        profile_cols[3].metric(label='Market Cap', value=f'{marketCap_value} M')
 
+
+        col1, col2 = st.columns([3, 1])
+
+        with col1:
+            employee_value = 'N/A' if employee == 'N/A' else f'{employee:,}'
+            marketCap_value = 'N/A' if marketCap == 'N/A' else f'${marketCap/1000000:,.2f} M'
+
+            st.markdown(f"""
+            <table>
+                <tr><td><strong>Sector</strong></td><td>{sector}</td></tr>
+                <tr><td><strong>Industry</strong></td><td>{industry}</td></tr>
+                <tr><td><strong>Employees</strong></td><td>{employee_value}</td></tr>
+                <tr><td><strong>Market Cap</strong></td><td>{marketCap_value}</td></tr>
+            </table>
+            """, unsafe_allow_html=True)
+
+        with col2:
+            st.markdown(f"""
+            <div style='text-align: right;'>
+                <img src='{picture_url}' width='100'>
+            </div>
+            """, unsafe_allow_html=True)
+        
         st.write(f'{longProfile}')
 
-        st.header('Stock Performance', divider='gray')
+        st.subheader('Stock Performance', divider='gray')
         cols = st.columns(4)
 
         cols[0].metric(
@@ -91,6 +112,7 @@ if st.button("Submit"):
     except Exception as e:
         st.error(f"Failed to fetch data. {str(e)}")
 
+''
 ''
 ''
 
