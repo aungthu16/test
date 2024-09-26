@@ -50,7 +50,7 @@ if st.button("Submit"):
 
         profile_cols[0].metric(label='Sector', value=f'{sector}')
         profile_cols[1].metric(label='Industry', value=f'{industry}')
-        profile_cols[2].metric(label='Employees', value=f'{employee:,}')
+        profile_cols[2].metric(label='Employees', value=f'{employee:}')
         profile_cols[3].metric(label='Market Cap', value=f'{marketCap/1000000:,.2f} M')
 
         st.write(f'{longProfile}')
