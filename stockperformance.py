@@ -93,6 +93,5 @@ if st.button("Submit"):
 
 ''
 ''
-''
 
 st.info('Data provided by Yahoo Finance')
