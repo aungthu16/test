@@ -85,6 +85,8 @@ if st.button("Submit"):
         price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website = get_stock_data(ticker)
 
         st.header(f'{name}', divider='gray')
+
+        ''
         
         employee_value = 'N/A' if employee == 'N/A' else f'{employee:,}'
         marketCap_value = 'N/A' if marketCap == 'N/A' else f'${marketCap/1000000:,.2f}'
