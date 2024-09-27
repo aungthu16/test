@@ -89,18 +89,19 @@ if st.button("Submit"):
         employee_value = 'N/A' if employee == 'N/A' else f'{employee:,}'
         marketCap_value = 'N/A' if marketCap == 'N/A' else f'${marketCap/1000000:,.2f}'
 
-        col1, col2 = st.columns([1, 3])
+        col1, col2 = st.columns([3, 3])
         with col1:
-            st.markdown(f"""
-            <div style='text-align: middle;'>
-                <img src='{picture_url}'>
-            </div>
-            """, unsafe_allow_html=True)
+                st.markdown(f"""
+                <div style='text-align: left;'>
+                    <img src='{picture_url}' width='100'>
+                </div>
+                """, unsafe_allow_html=True)
+                ''
 
         with col2:
             st.markdown(f"""
-            <div style='float: right;'>
-                <table>
+            <div style='float: left; width: 100%;'>
+                <table style='width: 100%;'>
                     <tr><td><strong>Sector</strong></td><td>{sector}</td></tr>
                     <tr><td><strong>Industry</strong></td><td>{industry}</td></tr>
                     <tr><td><strong>Employees</strong></td><td>{employee_value}</td></tr>
