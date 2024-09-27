@@ -4,5 +4,4 @@ requests
 pandas
 numpy
 yfinance
-http.client
 json
