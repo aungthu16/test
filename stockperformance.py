@@ -65,8 +65,6 @@ if st.button("Submit"):
                 <img src='{picture_url}' width='100'>
             </div>
             """, unsafe_allow_html=True)
-            ''
-            ''
 
         with col2:
             employee_value = 'N/A' if employee == 'N/A' else f'{employee:,}'
