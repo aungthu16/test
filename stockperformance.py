@@ -118,3 +118,59 @@ if st.button("Submit"):
         st.subheader('Stock Performance', divider='gray')
         cols = st.columns(4)
 
+        cols[0].metric(
+            label=f'{ticker.upper()} Current Price',
+            value=f'${price:,.2f}',
+            delta=f'{change_dollar:,.2f} ({change_percent:.2f}%)',
+            delta_color='normal' 
+        )
+
+        eps_value = 'N/A' if eps == 'N/A' else f'{eps:,.2f}'
+        cols[1].metric(
+            label='EPS (ttm)',
+            value=eps_value
+        )
+        
+        pegRatio_value = 'N/A' if pegRatio == 'N/A' else f'{pegRatio:,.2f}'
+        cols[2].metric(
+            label='PEG Ratio',
+            value=pegRatio_value
+        )
+
+        beta_value = 'N/A' if beta == 'N/A' else f'{beta:.2f}'
+        cols[3].metric(
+            label='Beta',
+            value=beta_value
+        )
+
+        st.subheader('Anslysts Ratings', divider='gray')
+
+        col1, col2 = st.columns([3, 3])
+        with col1:
+            st.markdown(f"""
+            <table>
+                <tr><td><strong>SA Price Target</strong></td><td>{sa_analysts_targetprice}</td></tr>
+                <tr><td><strong>SA Analyst Consensus</strong></td><td>{sa_analysts_consensus}</td></tr>
+                <tr><td><strong>SA Analyst Count</strong></td><td>{sa_analysts_count}</td></tr>
+            </table>
+            """, unsafe_allow_html=True)
+
+        yf_targetprice_value = 'N/A' if yf_targetprice == 'N/A' else f'${yf_targetprice:,2f}'
+
+        with col2:
+            st.markdown(f"""
+            <table>
+                <tr><td><strong>YF Price Target</strong></td><td>{yf_targetprice_value}</td></tr>
+                <tr><td><strong>YF Analyst Consensus</strong></td><td>{yf_consensus}</td></tr>
+                <tr><td><strong>YF Analyst Count</strong></td><td>{yf_analysts_count}</td></tr>
+            </table>
+            """, unsafe_allow_html=True)
+   
+    except Exception as e:
+        st.error(f"Failed to fetch data. {str(e)}")
+
+''
+''
+''
+
+st.info('Data provided by Yahoo Finance')
