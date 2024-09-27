@@ -92,8 +92,8 @@ if st.button("Submit"):
         col1, col2 = st.columns([1, 3])
         with col1:
             st.markdown(f"""
-            <div style='text-align: left;'>
-                <img src='{picture_url}' style='width:100%; max-width:150px; height:auto;'>
+            <div style='text-align: middle;'>
+                <img src='{picture_url}'>
             </div>
             """, unsafe_allow_html=True)
 
