@@ -58,9 +58,9 @@ def get_stock_data(ticker):
     eps = stock.info.get('trailingEps','N/A')
     pegRatio = stock.info.get('pegRatio','N/A')
     country = stock.info.get('country', 'N/A')
-    yf_targetprice = stock.info.get(' targetMeanPrice','N/A')
-    yf_consensus = stock.info.get(' recommendationKey','N/A')
-    yf_analysts_count = stock.info.get('  numberOfAnalystOpinions','N/A')
+    yf_targetprice = stock.info.get('targetMeanPrice','N/A')
+    yf_consensus = stock.info.get('recommendationKey','N/A')
+    yf_analysts_count = stock.info.get('numberOfAnalystOpinions','N/A')
     website = stock.info.get('website','N/A')
     
     
@@ -159,7 +159,7 @@ if st.button("Submit"):
             </table>
             """, unsafe_allow_html=True)
 
-        yf_targetprice_value = 'N/A' if yf_targetprice == 'N/A' else f'${yf_targetprice:,2f}'
+        yf_targetprice_value = 'N/A' if yf_targetprice == 'N/A' else f'${yf_targetprice}'
 
         with col2:
             st.markdown(f"""
