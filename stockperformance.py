@@ -1,9 +1,10 @@
 import streamlit as st
-from streamlit.elements import markdown
 import yfinance as yf
 import requests
 from bs4 import BeautifulSoup
 import math
+import http.client
+import json
 
 st.set_page_config(
     page_title='Stock Analysis Dashboard',
@@ -11,21 +12,61 @@ st.set_page_config(
 )
 
 @st.cache_data
-def get_stock_data(ticker):
-    
+def get_stock_data(ticker, apiKey=None):
+
+    performance_id = None
+    if apiKey:
+        try:
+            conn = http.client.HTTPSConnection("morning-star.p.rapidapi.com")
+            headers = {
+                'x-rapidapi-key': apiKey,
+                'x-rapidapi-host': "morning-star.p.rapidapi.com"
+            }
+            conn.request("GET", "/market/v2/auto-complete?q=" + ticker, headers=headers)
+            res = conn.getresponse()
+            data = res.read()
+            json_data = json.loads(data.decode("utf-8"))
+            for item in json_data.get('results', []):
+                if item.get('ticker', '').upper() == ticker.upper():
+                    performance_id = item.get('performanceId')
+                    break
+        except Exception as e:
+            st.warning(f"API request failed: {e}")
+
+    if performance_id:
+        try:
+            conn = http.client.HTTPSConnection("morning-star.p.rapidapi.com")
+            headers = {
+                'x-rapidapi-key': apiKey,
+                'x-rapidapi-host': "morning-star.p.rapidapi.com"
+            }
+            conn.request("GET", "/stock/v2/get-analysis-data?performanceId="+ performance_id, headers=headers)
+            res = conn.getresponse()
+            data = res.read()
+            json_data = json.loads(data.decode("utf-8"))
+            fair_value = json_data['valuation']['fairValue']
+            fvDate = json_data['valuation']['fairValueDate']
+            moat = json_data['valuation']['moat']
+            moatDate = json_data['valuation']['moatDate']
+            starRating = json_data['valuation']['startRating']
+        except Exception as e:
+            st.warning(f"data request failed: {e}")
+
     lowercase_ticker = ticker.lower()
     picture_url = "https://logos.stockanalysis.com/" + lowercase_ticker + ".svg"
-    
-    sa_statistics_url = "https://stockanalysis.com/stocks/" + ticker + "/statistics/"
-    sa_statistics_response = requests.get(sa_statistics_url)
-    sa_statistics_soup = BeautifulSoup(sa_statistics_response.content, "html.parser")
-    sa_analyst_table = sa_statistics_soup.find_all('table')[15]
-    sa_analysts_data = {}
-    sa_analysts_consensus = "N/A"
-    sa_analysts_targetprice = "N/A"
-    sa_analysts_count = "N/A"
-    
-    if sa_analyst_table:
+
+    try:
+        sa_statistics_url = "https://stockanalysis.com/stocks/" + ticker + "/statistics/"
+        sa_statistics_response = requests.get(sa_statistics_url)
+        sa_statistics_soup = BeautifulSoup(sa_statistics_response.content, "html.parser")
+
+        sa_analyst_table = sa_statistics_soup.find_all('table')[15]
+        sa_analysts_data = {}
+        sa_analysts_consensus = "N/A"
+        sa_analysts_targetprice = "N/A"
+        sa_analysts_count = "N/A"
+
+        if sa_analyst_table:
             rows = sa_analyst_table.find_all('tr')
             for row in rows:
                 cols = row.find_all('td')
@@ -37,16 +78,17 @@ def get_stock_data(ticker):
             sa_analysts_consensus = sa_analysts_data.get("Analyst Consensus", "N/A")
             sa_analysts_targetprice = sa_analysts_data.get("Price Target", "N/A")
             sa_analysts_count = sa_analysts_data.get("Analyst Count", "N/A")
-    else: 
-            print("SA analyst table not found on the page")
+    except Exception as e:
+        st.warning(f"Failed to scrape data from StockAnalysis: {e}")
 
-    sa_holding_table = sa_statistics_soup.find_all('table')[2]
-    sa_holding_data = {}
-    sa_share_outstanding = "N/A"
-    sa_owned_insiders = "N/A"
-    sa_owned_institutions = "N/A"
+    try:
+        sa_holding_table = sa_statistics_soup.find_all('table')[2]
+        sa_holding_data = {}
+        sa_share_outstanding = "N/A"
+        sa_owned_insiders = "N/A"
+        sa_owned_institutions = "N/A"
 
-    if sa_holding_table:
+        if sa_holding_table:
             rows = sa_holding_table.find_all('tr')
             for row in rows:
                 cols = row.find_all('td')
@@ -58,41 +100,40 @@ def get_stock_data(ticker):
             sa_share_outstanding = sa_holding_data.get("Shares Outstanding", "N/A")
             sa_owned_insiders = sa_holding_data.get("Owned by Insiders (%)", "N/A")
             sa_owned_institutions = sa_holding_data.get("Owned by Institutions (%)", "N/A")
-    else: 
-            print("SA holding table not found on the page")
-    
+    except Exception as e:
+        st.warning(f"Failed to scrape holding data: {e}")
+
     stock = yf.Ticker(ticker)
     data = stock.history(period='max')
 
     if data.empty:
         raise ValueError("No data found for this ticker.")
 
-    name = stock.info.get('longName','N/A')
-    sector = stock.info.get('sector','N/A')
-    industry = stock.info.get('industry','N/A')
-    employee = stock.info.get('fullTimeEmployees','N/A')
-    marketCap = stock.info.get('marketCap','N/A')
+    name = stock.info.get('longName', 'N/A')
+    sector = stock.info.get('sector', 'N/A')
+    industry = stock.info.get('industry', 'N/A')
+    employee = stock.info.get('fullTimeEmployees', 'N/A')
+    marketCap = stock.info.get('marketCap', 'N/A')
     price = stock.info.get('currentPrice', 'N/A')
     previous_close = data['Close'].iloc[-2]
     beta = stock.info.get('beta', 'N/A')
-    longProfile = stock.info.get('longBusinessSummary','N/A')
-    eps = stock.info.get('trailingEps','N/A')
-    pegRatio = stock.info.get('pegRatio','N/A')
+    longProfile = stock.info.get('longBusinessSummary', 'N/A')
+    eps = stock.info.get('trailingEps', 'N/A')
+    pegRatio = stock.info.get('pegRatio', 'N/A')
     country = stock.info.get('country', 'N/A')
-    yf_targetprice = stock.info.get('targetMeanPrice','N/A')
-    yf_consensus = stock.info.get('recommendationKey','N/A')
-    yf_analysts_count = stock.info.get('numberOfAnalystOpinions','N/A')
-    website = stock.info.get('website','N/A')
-    peRatio = stock.info.get('trailingPE','N/A')
-    forwardPe = stock.info.get('forwardPE','N/A')
-    dividendYield = stock.info.get('dividendYield','N/A')
-    payoutRatio = stock.info.get('payoutRatio','N/A')
-    
-    
+    yf_targetprice = stock.info.get('targetMeanPrice', 'N/A')
+    yf_consensus = stock.info.get('recommendationKey', 'N/A')
+    yf_analysts_count = stock.info.get('numberOfAnalystOpinions', 'N/A')
+    website = stock.info.get('website', 'N/A')
+    peRatio = stock.info.get('trailingPE', 'N/A')
+    forwardPe = stock.info.get('forwardPE', 'N/A')
+    dividendYield = stock.info.get('dividendYield', 'N/A')
+    payoutRatio = stock.info.get('payoutRatio', 'N/A')
+
     change_dollar = price - previous_close
     change_percent = (change_dollar / previous_close) * 100
 
-    return price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap,longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, sa_share_outstanding, sa_owned_insiders, sa_owned_institutions
+    return price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, sa_share_outstanding, sa_owned_insiders, sa_owned_institutions, performance_id, fair_value, fvDate, moat, moatDate, starRating
 
 '''
 # :chart_with_upwards_trend: Stock Analysis Dashboard
@@ -105,27 +146,27 @@ Browse stock data and view the latest market trends.
 
 ticker = st.text_input("Enter US Stock Ticker:", "AAPL")
 
-MS_API = st.text_input("Entre your Morningstar RapidAPI Key:", "")
+apiKey = st.text_input("Enter your Morningstar RapidAPI Key (optional):", "")
 
 if st.button("Submit"):
     try:
-        price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, sa_share_outstanding, sa_owned_insiders, sa_owned_institutions = get_stock_data(ticker)
+        price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, sa_share_outstanding, sa_owned_insiders, sa_owned_institutions, performance_id, fair_value, fvDate, moat, moatDate, starRating = get_stock_data(ticker, apiKey if apiKey.strip() else None)
 
         st.header(f'{name}', divider='gray')
 
         ''
-        
+        ''
+
         employee_value = 'N/A' if employee == 'N/A' else f'{employee:,}'
         marketCap_value = 'N/A' if marketCap == 'N/A' else f'${marketCap/1000000:,.2f}'
 
         col1, col2 = st.columns([2, 3])
         with col1:
-                st.markdown(f"""
-                <div style='text-align: left;'>
-                    <img src='{picture_url}' width='100'>
-                </div>
-                """, unsafe_allow_html=True)
-                ''
+            st.markdown(f"""
+            <div style='text-align: left;'>
+                <img src='{picture_url}' width='100'>
+            </div>
+            """, unsafe_allow_html=True)
 
         with col2:
             st.markdown(f"""
@@ -154,14 +195,14 @@ if st.button("Submit"):
             label='Owned by Institutions',
             value=sa_owned_institutions
         )
-        
+
         st.markdown(f"<div style='text-align: justify;'>{longProfile}</div>", unsafe_allow_html=True)
 
         ''
         ''
 
         st.subheader('Stock Performance', divider='gray')
-        
+
         cols = st.columns(4)
 
         cols[0].metric(
@@ -176,7 +217,7 @@ if st.button("Submit"):
             label='EPS (ttm)',
             value=eps_value
         )
-        
+
         pegRatio_value = 'N/A' if pegRatio == 'N/A' else f'{pegRatio:,.2f}'
         cols[2].metric(
             label='PEG Ratio',
@@ -217,8 +258,13 @@ if st.button("Submit"):
 
         st.subheader('Quantitative Scores', divider='gray')
 
+        st.write(f'Fair Value: {fair_value}')
+        st.write(f'Fair Value Date: {fvDate}')
+        st.write(f'Economic Moat: {moat}')
+        st.write(f'Moat Date: {moatDate}')
+        st.write(f'Star Rating: {starRating}')
 
-        st.subheader('Anslysts Ratings', divider='gray')
+        st.subheader('Analysts Ratings', divider='gray')
 
         col1, col2 = st.columns([3, 3])
         with col1:
@@ -242,7 +288,7 @@ if st.button("Submit"):
                 <tr><td><strong>Analyst Count</strong></td><td>{yf_analysts_count}</td></tr>
             </table>
             """, unsafe_allow_html=True)
-   
+
     except Exception as e:
         st.error(f"Failed to fetch data. {str(e)}")
 
@@ -250,4 +296,4 @@ if st.button("Submit"):
 ''
 ''
 
-st.info('Data provided by Yahoo Finance')
+st.info('Data provided by Yahoo Finance, Morning Star, and StockAnalysis.com')
