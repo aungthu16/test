@@ -1,6 +1,8 @@
 import streamlit as st
 from streamlit.elements import markdown
 import yfinance as yf
+import requests
+from bs4 import BeautifulSoup
 import math
 
 st.set_page_config(
@@ -10,8 +12,34 @@ st.set_page_config(
 
 @st.cache_data
 def get_stock_data(ticker):
+    
     lowercase_ticker = ticker.lower()
     picture_url = "https://logos.stockanalysis.com/" + lowercase_ticker + ".svg"
+    
+    sa_analysts_url = "https://stockanalysis.com/stocks/" + ticker + "/statistics/"
+    sa_analysts_response = requests.get(sa_analysts_url)
+    sa_analysts_soup = BeautifulSoup(sa_analysts_response.content, "html.parser")
+    sa_analyst_table = sa_analysts_soup.find_all('table')[15]
+    sa_analysts_data = {}
+    sa_analysts_consensus = "N/A"
+    sa_analysts_targetprice = "N/A"
+    sa_analysts_count = "N/A"
+    
+    if sa_analyst_table:
+            rows = sa_analyst_table.find_all('tr')
+            for row in rows:
+                cols = row.find_all('td')
+                if len(cols) == 2:  
+                    key = cols[0].text.strip()
+                    value = cols[1].text.strip()
+                    sa_analysts_data[key] = value
+
+            sa_analysts_consensus = sa_analysts_data.get("Analyst Consensus", "N/A")
+            sa_analysts_targetprice = sa_analysts_data.get("Price Target", "N/A")
+            sa_analysts_count = sa_analysts_data.get("Analyst Count", "N/A")
+    else: 
+            print("SA analyst table not found on the page")
+    
     stock = yf.Ticker(ticker)
     data = stock.history(period='max')
 
@@ -29,11 +57,17 @@ def get_stock_data(ticker):
     longProfile = stock.info.get('longBusinessSummary','N/A')
     eps = stock.info.get('trailingEps','N/A')
     pegRatio = stock.info.get('pegRatio','N/A')
+    country = stock.info.get('country', 'N/A')
+    yf_targetprice = stock.info.get(' targetMeanPrice','N/A')
+    yf_consensus = stock.info.get(' recommendationKey','N/A')
+    yf_analysts_count = stock.info.get('  numberOfAnalystOpinions','N/A')
+    website = stock.info.get('website','N/A')
+    
     
     change_dollar = price - previous_close
     change_percent = (change_dollar / previous_close) * 100
 
-    return price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap,longProfile, eps, pegRatio, picture_url
+    return price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap,longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website
 
 '''
 # :chart_with_upwards_trend: Stock Analysis Dashboard
@@ -48,7 +82,7 @@ ticker = st.text_input("Enter US Stock Ticker:", "AAPL")
 
 if st.button("Submit"):
     try:
-        price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url = get_stock_data(ticker)
+        price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website = get_stock_data(ticker)
 
         st.markdown(f"""
         <div style='text-align: left;'>
@@ -69,10 +103,15 @@ if st.button("Submit"):
                 <tr><td><strong>Industry</strong></td><td>{industry}</td></tr>
                 <tr><td><strong>Employees</strong></td><td>{employee_value}</td></tr>
                 <tr><td><strong>Market Cap</strong></td><td>{marketCap_value}</td></tr>
+                <tr><td><strong>Country</strong></td><td>{country}</td></tr>
+                <tr><td><strong>Website</strong></td><td>{website}</td></tr>
             </table>
             """, unsafe_allow_html=True)
         
-        st.write(f'{longProfile}')
+        st.markdown(f"<div style='text-align: justify;'>{longProfile}</div>", unsafe_allow_html=True)
+
+        ''
+        ''
 
         st.subheader('Stock Performance', divider='gray')
         cols = st.columns(4)
@@ -101,7 +140,30 @@ if st.button("Submit"):
             label='Beta',
             value=beta_value
         )
-        
+
+        st.subheader('Anslysts Ratings', divider='gray')
+
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.markdown(f"""
+            <table>
+                <tr><td><strong>SA Price Target</strong></td><td>{sa_analysts_targetprice}</td></tr>
+                <tr><td><strong>SA Analyst Consensus</strong></td><td>{sa_analysts_consensus}</td></tr>
+                <tr><td><strong>SA Analyst Count</strong></td><td>{sa_analysts_count}</td></tr>
+            </table>
+            """, unsafe_allow_html=True)
+
+        yf_targetprice_value = 'N/A' if yf_targetprice == 'N/A' else f'${yf_targetprice:,2f}'
+
+        with col2:
+            st.markdown(f"""
+            <table>
+                <tr><td><strong>YF Price Target</strong></td><td>{yf_targetprice_value}</td></tr>
+                <tr><td><strong>YF Analyst Consensus</strong></td><td>{yf_consensus}</td></tr>
+                <tr><td><strong>YF Analyst Count</strong></td><td>{yf_analysts_count}</td></tr>
+            </table>
+            """, unsafe_allow_html=True)
+   
     except Exception as e:
         st.error(f"Failed to fetch data. {str(e)}")
 
