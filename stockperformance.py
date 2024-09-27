@@ -50,6 +50,12 @@ if st.button("Submit"):
     try:
         price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url = get_stock_data(ticker)
 
+        st.markdown(f"""
+        <div style='text-align: left;'>
+            <img src='{picture_url}' width='100'>
+        </div>
+        """, unsafe_allow_html=True)
+
         st.header(f'{name}', divider='gray')
        
 
@@ -57,20 +63,7 @@ if st.button("Submit"):
         marketCap_value = 'N/A' if marketCap == 'N/A' else f'${marketCap/1000000:,.2f}'
 
 
-        col1, col2 = st.columns([3, 1])
-
-        with col1:
-            st.markdown(f"""
-            <div style='text-align: left;'>
-                <img src='{picture_url}' width='100'>
-            </div>
-            """, unsafe_allow_html=True)
-
-        with col2:
-            employee_value = 'N/A' if employee == 'N/A' else f'{employee:,}'
-            marketCap_value = 'N/A' if marketCap == 'N/A' else f'${marketCap/1000000:,.2f} M'
-
-            st.markdown(f"""
+        st.markdown(f"""
             <table>
                 <tr><td><strong>Sector</strong></td><td>{sector}</td></tr>
                 <tr><td><strong>Industry</strong></td><td>{industry}</td></tr>
@@ -105,15 +98,3 @@ if st.button("Submit"):
 
         beta_value = 'N/A' if beta == 'N/A' else f'{beta:.2f}'
         cols[3].metric(
-            label='Beta',
-            value=beta_value
-        )
-        
-    except Exception as e:
-        st.error(f"Failed to fetch data. {str(e)}")
-
-''
-''
-''
-
-st.info('Data provided by Yahoo Finance')
