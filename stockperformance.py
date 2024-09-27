@@ -93,21 +93,22 @@ if st.button("Submit"):
         with col1:
             st.markdown(f"""
             <div style='text-align: left;'>
-                <img src='{picture_url}' width='100'>
+                <img src='{picture_url}' style='width:100%; max-width:150px; height:auto;'>
             </div>
             """, unsafe_allow_html=True)
-            ''
 
         with col2:
             st.markdown(f"""
-            <table>
-                <tr><td><strong>Sector</strong></td><td>{sector}</td></tr>
-                <tr><td><strong>Industry</strong></td><td>{industry}</td></tr>
-                <tr><td><strong>Employees</strong></td><td>{employee_value}</td></tr>
-                <tr><td><strong>Market Cap</strong></td><td>{marketCap_value}</td></tr>
-                <tr><td><strong>Country</strong></td><td>{country}</td></tr>
-                <tr><td><strong>Website</strong></td><td>{website}</td></tr>
-            </table>
+            <div style='float: right;'>
+                <table>
+                    <tr><td><strong>Sector</strong></td><td>{sector}</td></tr>
+                    <tr><td><strong>Industry</strong></td><td>{industry}</td></tr>
+                    <tr><td><strong>Employees</strong></td><td>{employee_value}</td></tr>
+                    <tr><td><strong>Market Cap</strong></td><td>{marketCap_value}</td></tr>
+                    <tr><td><strong>Country</strong></td><td>{country}</td></tr>
+                    <tr><td><strong>Website</strong></td><td>{website}</td></tr>
+                </table>
+            </div>
             """, unsafe_allow_html=True)
         
         st.markdown(f"<div style='text-align: justify;'>{longProfile}</div>", unsafe_allow_html=True)
