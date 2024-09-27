@@ -16,10 +16,10 @@ def get_stock_data(ticker):
     lowercase_ticker = ticker.lower()
     picture_url = "https://logos.stockanalysis.com/" + lowercase_ticker + ".svg"
     
-    sa_analysts_url = "https://stockanalysis.com/stocks/" + ticker + "/statistics/"
-    sa_analysts_response = requests.get(sa_analysts_url)
-    sa_analysts_soup = BeautifulSoup(sa_analysts_response.content, "html.parser")
-    sa_analyst_table = sa_analysts_soup.find_all('table')[15]
+    sa_statistics_url = "https://stockanalysis.com/stocks/" + ticker + "/statistics/"
+    sa_statistics_response = requests.get(sa_statistics_url)
+    sa_statistics_soup = BeautifulSoup(sa_statistics_response.content, "html.parser")
+    sa_analyst_table = sa_statistics_soup.find_all('table')[15]
     sa_analysts_data = {}
     sa_analysts_consensus = "N/A"
     sa_analysts_targetprice = "N/A"
@@ -39,6 +39,27 @@ def get_stock_data(ticker):
             sa_analysts_count = sa_analysts_data.get("Analyst Count", "N/A")
     else: 
             print("SA analyst table not found on the page")
+
+    sa_holding_table = sa_statistics_soup.find_all('table')[2]
+    sa_holding_data = {}
+    sa_share_outstanding = "N/A"
+    sa_owned_insiders = "N/A"
+    sa_owned_institutions = "N/A"
+
+    if sa_holding_table:
+            rows = sa_holding_table.find_all('tr')
+            for row in rows:
+                cols = row.find_all('td')
+                if len(cols) == 2:  
+                    key = cols[0].text.strip()
+                    value = cols[1].text.strip()
+                    sa_holding_data[key] = value
+
+            sa_share_outstanding = sa_holding_data.get("Shares Outstanding", "N/A")
+            sa_owned_insiders = sa_holding_data.get("Owned by Insiders (%)", "N/A")
+            sa_owned_institutions = sa_holding_data.get("Owned by Institutions (%)", "N/A")
+    else: 
+            print("SA holding table not found on the page")
     
     stock = yf.Ticker(ticker)
     data = stock.history(period='max')
@@ -71,7 +92,7 @@ def get_stock_data(ticker):
     change_dollar = price - previous_close
     change_percent = (change_dollar / previous_close) * 100
 
-    return price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap,longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio
+    return price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap,longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, sa_share_outstanding, sa_owned_insiders, sa_owned_institutions
 
 '''
 # :chart_with_upwards_trend: Stock Analysis Dashboard
@@ -86,7 +107,7 @@ ticker = st.text_input("Enter US Stock Ticker:", "AAPL")
 
 if st.button("Submit"):
     try:
-        price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio = get_stock_data(ticker)
+        price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, sa_share_outstanding, sa_owned_insiders, sa_owned_institutions = get_stock_data(ticker)
 
         st.header(f'{name}', divider='gray')
 
@@ -117,6 +138,20 @@ if st.button("Submit"):
                 </table>
             </div>
             """, unsafe_allow_html=True)
+
+        h_cols = st.columns(3)
+        h_cols[0].metric(
+            label='Shares Outstanding',
+            value=sa_share_outstanding
+        )
+        h_cols[1].metric(
+            label='Owned by Insiders',
+            value=sa_owned_insiders
+        )
+        h_cols[2].metric(
+            label='Owned by Institutions',
+            value=sa_owned_institutions
+        )
         
         st.markdown(f"<div style='text-align: justify;'>{longProfile}</div>", unsafe_allow_html=True)
 
@@ -177,6 +212,9 @@ if st.button("Submit"):
             label='Payout Ratio',
             value=payoutRatio_value
         )
+
+        st.subheader('Quantitative Scores', divider='gray')
+
 
         st.subheader('Anslysts Ratings', divider='gray')
 
