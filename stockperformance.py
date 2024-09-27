@@ -98,3 +98,15 @@ if st.button("Submit"):
 
         beta_value = 'N/A' if beta == 'N/A' else f'{beta:.2f}'
         cols[3].metric(
+            label='Beta',
+            value=beta_value
+        )
+        
+    except Exception as e:
+        st.error(f"Failed to fetch data. {str(e)}")
+
+''
+''
+''
+
+st.info('Data provided by Yahoo Finance')
