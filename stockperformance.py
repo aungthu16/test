@@ -62,12 +62,16 @@ def get_stock_data(ticker):
     yf_consensus = stock.info.get('recommendationKey','N/A')
     yf_analysts_count = stock.info.get('numberOfAnalystOpinions','N/A')
     website = stock.info.get('website','N/A')
+    peRatio = stock.info.get('trailingPE','N/A')
+    forwardPe = stock.info.get('forwardPE','N/A')
+    dividendYield = stock.info.get('dividendYield','N/A')
+    payoutRatio = stock.info.get('payoutRatio','N/A')
     
     
     change_dollar = price - previous_close
     change_percent = (change_dollar / previous_close) * 100
 
-    return price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap,longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website
+    return price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap,longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio
 
 '''
 # :chart_with_upwards_trend: Stock Analysis Dashboard
@@ -82,7 +86,7 @@ ticker = st.text_input("Enter US Stock Ticker:", "AAPL")
 
 if st.button("Submit"):
     try:
-        price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website = get_stock_data(ticker)
+        price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio = get_stock_data(ticker)
 
         st.header(f'{name}', divider='gray')
 
@@ -120,6 +124,7 @@ if st.button("Submit"):
         ''
 
         st.subheader('Stock Performance', divider='gray')
+        
         cols = st.columns(4)
 
         cols[0].metric(
@@ -147,15 +152,42 @@ if st.button("Submit"):
             value=beta_value
         )
 
+        cols1 = st.columns(4)
+
+        pe_value = 'N/A' if peRatio == 'N/A' else f'{peRatio:.2f}'
+        cols1[0].metric(
+            label='PE Ratio',
+            value=pe_value
+        )
+
+        forwardPe_value = 'N/A' if forwardPe == 'N/A' else f'{forwardPe:.2f}'
+        cols1[1].metric(
+            label='Forward PE',
+            value=forwardPe_value
+        )
+
+        dividendyield_value = 'N/A' if dividendYield == 'N/A' else f'{dividendYield*100:.2f}%'
+        cols1[2].metric(
+            label='Dividend Yield',
+            value=dividendyield_value
+        )
+
+        payoutRatio_value = 'N/A' if payoutRatio == 'N/A' else f'{payoutRatio:.2f}'
+        cols1[3].metric(
+            label='Payout Ratio',
+            value=payoutRatio_value
+        )
+
         st.subheader('Anslysts Ratings', divider='gray')
 
         col1, col2 = st.columns([3, 3])
         with col1:
             st.markdown(f"""
             <table>
-                <tr><td><strong>SA Price Target</strong></td><td>{sa_analysts_targetprice}</td></tr>
-                <tr><td><strong>SA Analyst Consensus</strong></td><td>{sa_analysts_consensus}</td></tr>
-                <tr><td><strong>SA Analyst Count</strong></td><td>{sa_analysts_count}</td></tr>
+                <tr><td colspan="2" style="text-align: center;"><strong>Stockanalysis.com</strong></td></tr>
+                <tr><td><strong>Price Target</strong></td><td>{sa_analysts_targetprice}</td></tr>
+                <tr><td><strong>Analyst Consensus</strong></td><td>{sa_analysts_consensus}</td></tr>
+                <tr><td><strong>Analyst Count</strong></td><td>{sa_analysts_count}</td></tr>
             </table>
             """, unsafe_allow_html=True)
 
@@ -164,9 +196,10 @@ if st.button("Submit"):
         with col2:
             st.markdown(f"""
             <table>
-                <tr><td><strong>YF Price Target</strong></td><td>{yf_targetprice_value}</td></tr>
-                <tr><td><strong>YF Analyst Consensus</strong></td><td>{yf_consensus}</td></tr>
-                <tr><td><strong>YF Analyst Count</strong></td><td>{yf_analysts_count}</td></tr>
+                <tr><td colspan="2" style="text-align: center;"><strong>Yahoo Finance</strong></td></tr>
+                <tr><td><strong>Price Target</strong></td><td>{yf_targetprice_value}</td></tr>
+                <tr><td><strong>Analyst Consensus</strong></td><td>{yf_consensus}</td></tr>
+                <tr><td><strong>Analyst Count</strong></td><td>{yf_analysts_count}</td></tr>
             </table>
             """, unsafe_allow_html=True)
    
