@@ -4,4 +4,3 @@ requests
 pandas
 numpy
 yfinance
-json
