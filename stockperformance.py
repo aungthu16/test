@@ -105,6 +105,8 @@ Browse stock data and view the latest market trends.
 
 ticker = st.text_input("Enter US Stock Ticker:", "AAPL")
 
+MS_API = st.text_input("Entre your Morningstar RapidAPI Key:", "")
+
 if st.button("Submit"):
     try:
         price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, sa_share_outstanding, sa_owned_insiders, sa_owned_institutions = get_stock_data(ticker)
