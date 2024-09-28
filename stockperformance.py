@@ -2,6 +2,7 @@ import streamlit as st
 import yfinance as yf
 import requests
 from bs4 import BeautifulSoup
+import math
 import http.client
 import json
 
@@ -14,6 +15,7 @@ st.set_page_config(
 def get_stock_data(ticker, apiKey=None):
 
     performance_id = None
+    fair_value = fvDate = moat = moatDate = starRating = 'N/A'
     if apiKey:
         try:
             conn = http.client.HTTPSConnection("morning-star.p.rapidapi.com")
