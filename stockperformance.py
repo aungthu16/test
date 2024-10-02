@@ -268,7 +268,7 @@ if st.button("Submit"):
                 label='Economic Moat',
                 value=moat,
             )
-            fair_value_mos ='N/A' if fair_value =='N/A' else f'{((fair_value - price)/fair_value) * 100:.2f}%'
+            fair_value_mos ='N/A' if fair_value =='N/A' else f'{((fair_value - price)/fair_value) * 100}%'
             mscol[1].metric(
                 label='Fair Value',
                 value=fair_value,
