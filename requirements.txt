@@ -1,6 +1,7 @@
 streamlit
 beautifulsoup4
+yfinance
 requests
 pandas
 numpy
-yfinance
+plotly
