@@ -14,7 +14,7 @@ st.set_page_config(
     page_icon=':chart_with_upwards_trend:',
 )
 
-#st.title("Stock Analysis Dashboard")
+st.title("Stock Analysis Dashboard")
 
 @st.cache_data
 def get_stock_data(ticker, apiKey=None):
@@ -57,6 +57,53 @@ def get_stock_data(ticker, apiKey=None):
             starRating = json_data['valuation']['startRating']
         except Exception as e:
             st.warning(f"data request failed: {e}")
+    
+    epsRevisionsGrade = dpsRevisionsGrade = dividendYieldGrade = divSafetyCategoryGrade = divGrowthCategoryGrade = divConsistencyCategoryGrade = sellSideRating = ticker_id = quant_rating = growth_grade = momentum_grade = profitability_grade = value_grade = yield_on_cost_grade = 'N/A'
+    if apiKey:
+        try:
+            conn = http.client.HTTPSConnection("seeking-alpha.p.rapidapi.com")
+            headers = {
+                'x-rapidapi-key': apiKey,
+                'x-rapidapi-host': "seeking-alpha.p.rapidapi.com"
+            }
+            conn.request("GET", "/symbols/get-ratings?symbol=" + ticker, headers=headers)
+            res = conn.getresponse()
+            data = res.read()
+            json_data = json.loads(data.decode("utf-8"))
+            first_data = json_data['data'][0]['attributes']['ratings']
+            ticker_id = json_data['data'][0]['attributes']['tickerId']
+            quant_rating = first_data['quantRating']
+            growth_grade = first_data['growthGrade']
+            momentum_grade = first_data['momentumGrade']
+            profitability_grade = first_data['profitabilityGrade']
+            value_grade = first_data['valueGrade']
+            yield_on_cost_grade = first_data['yieldOnCostGrade']
+            epsRevisionsGrade = first_data['epsRevisionsGrade']
+            dpsRevisionsGrade = first_data['dpsRevisionsGrade']
+            dividendYieldGrade = first_data['dividendYieldGrade']
+            divSafetyCategoryGrade = first_data['divSafetyCategoryGrade']
+            divGrowthCategoryGrade = first_data['divGrowthCategoryGrade']
+            divConsistencyCategoryGrade = first_data['divConsistencyCategoryGrade']
+            sellSideRating = first_data['sellSideRating']
+        except Exception as e:
+            st.warning(f"API request failed: {e}")
+        
+    sk_targetprice = 'N/A'
+    if apiKey:
+        try:
+            conn = http.client.HTTPSConnection("seeking-alpha.p.rapidapi.com")
+            headers = {
+                'x-rapidapi-key': apiKey,
+                'x-rapidapi-host': "seeking-alpha.p.rapidapi.com"
+            }
+            conn.request("GET", "/symbols/get-analyst-price-target?ticker_ids=" + ticker_id + "&return_window=1&group_by_month=false", headers=headers)
+            res = conn.getresponse()
+            data = res.read()
+            json_data = json.loads(data.decode("utf-8"))
+            get_sk_data = json_data['estimates'][f'{ticker_id}']['target_price']['0'][0]
+            sk_targetprice = get_sk_data['dataitemvalue']
+        except Exception as e:
+            st.warning(f"API request failed: {e}")
 
     lowercase_ticker = ticker.lower()
     picture_url = f'https://logos.stockanalysis.com/{lowercase_ticker}.svg'
@@ -132,7 +179,7 @@ def get_stock_data(ticker, apiKey=None):
     sa_price_float = float(sa_analysts_targetprice.replace('$', ''))
     sa_mos = ((sa_price_float - price)/sa_price_float) * 100
 
-    return sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos
+    return sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos
 
 ''
 ''
@@ -149,7 +196,7 @@ st.info('Data provided by Yahoo Finance, Morning Star, and StockAnalysis.com')
 
 if st.button("Submit"):
     try:
-        sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos = get_stock_data(ticker, apiKey if apiKey.strip() else None)
+        sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos = get_stock_data(ticker, apiKey if apiKey.strip() else None)
     
 ############### Profile ###############
 
@@ -260,6 +307,16 @@ if st.button("Submit"):
                 value=payoutRatio_value
             )
 
+            #Quant Rating
+            st.subheader('Quantitative Analysis', divider = 'gray')
+            st.caption("This section only works with RapidAPI key.")
+            st.write(quant_rating)
+            st.write(growth_grade)
+            st.write(momentum_grade)
+            st.write(profitability_grade)
+            st.write(value_grade)
+            st.write(yield_on_cost_grade)
+
             #Morning Star Research
             st.subheader('Morningstar Research', divider='gray')
             st.caption("This section only works with RapidAPI key.")
@@ -269,9 +326,10 @@ if st.button("Submit"):
                 value=moat,
             )
             fair_value_mos ='N/A' if fair_value =='N/A' else f'{((float(fair_value) - price)/float(fair_value)) * 100:.2f}%'
+            fair_value_fix = 'N/A' if fair_value == 'N/A' else f'${float(fair_value)}'
             mscol[1].metric(
                 label='Fair Value',
-                value=fair_value,
+                value=fair_value_fix,
                 delta=fair_value_mos,
                 delta_color='normal' 
             )
