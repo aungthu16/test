@@ -57,7 +57,7 @@ def get_stock_data(ticker, apiKey=None):
         except Exception as e:
             st.warning(f"data request failed: {e}")
     
-    epsRevisionsGrade = dpsRevisionsGrade = dividendYieldGrade = divSafetyCategoryGrade = divGrowthCategoryGrade = divConsistencyCategoryGrade = sellSideRating = ticker_id = quant_rating = growth_grade = momentum_grade = profitability_grade = value_grade = yield_on_cost_grade = 'N/A'
+    authors_strongsell_count = authors_strongbuy_count = authors_sell_count = authors_hold_count = authors_buy_count = authors_rating = authors_count = epsRevisionsGrade = dpsRevisionsGrade = dividendYieldGrade = divSafetyCategoryGrade = divGrowthCategoryGrade = divConsistencyCategoryGrade = sellSideRating = ticker_id = quant_rating = growth_grade = momentum_grade = profitability_grade = value_grade = yield_on_cost_grade = 'N/A'
     if apiKey:
         try:
             conn = http.client.HTTPSConnection("seeking-alpha.p.rapidapi.com")
@@ -71,6 +71,7 @@ def get_stock_data(ticker, apiKey=None):
             json_data = json.loads(data.decode("utf-8"))
             first_data = json_data['data'][0]['attributes']['ratings']
             ticker_id = json_data['data'][0]['attributes']['tickerId']
+            #
             quant_rating = first_data['quantRating']
             growth_grade = first_data['growthGrade']
             momentum_grade = first_data['momentumGrade']
@@ -84,6 +85,15 @@ def get_stock_data(ticker, apiKey=None):
             divGrowthCategoryGrade = first_data['divGrowthCategoryGrade']
             divConsistencyCategoryGrade = first_data['divConsistencyCategoryGrade']
             sellSideRating = first_data['sellSideRating']
+            #
+            authors_count = first_data['authorsCount']
+            authors_rating = first_data['authorsRating']
+            authors_buy_count = first_data['authorsRatingBuyCount']
+            authors_hold_count = first_data['authorsRatingHoldCount']
+            authors_sell_count = first_data['authorsRatingSellCount']
+            authors_strongbuy_count = first_data['authorsRatingStrongBuyCount']
+            authors_strongsell_count = first_data['authorsRatingStrongSellCount']
+
         except Exception as e:
             st.warning(f"API request failed: {e}")
         
@@ -179,7 +189,7 @@ def get_stock_data(ticker, apiKey=None):
     sa_price_float = float(sa_analysts_targetprice.replace('$', ''))
     sa_mos = ((sa_price_float - price)/sa_price_float) * 100
 
-    return assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos
+    return authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos
 
 ''
 ''
@@ -196,7 +206,7 @@ st.info('Data provided by Yahoo Finance, Morning Star, and StockAnalysis.com')
 
 if st.button("Submit"):
     try:
-        assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos = get_stock_data(ticker, apiKey if apiKey.strip() else None)
+        authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos = get_stock_data(ticker, apiKey if apiKey.strip() else None)
     
 ############### Profile ###############
 
@@ -329,7 +339,7 @@ if st.button("Submit"):
                 st.subheader(f'{star_rating}')
             ''
             #st.markdown(f'Current price of the stock is <span style="color:blue;">{assessment}</span>.', unsafe_allow_html=True)
-            st.write(f'Current price of the stock is {assessment}.')
+            st.write(f'Morningstar Current Assessment: {assessment}')
             ''
             st.caption(f"An economic moat refers to a company's ability to maintain competitive advantages to protect its long-term profits and market share from competitors.<br>Moat Assessment Date: {moatDate}", unsafe_allow_html=True)
             st.caption(f"The Star Rating is determined by three factors: a stock's current price, Morningstar's estimate of the stock's fair value, and the uncertainty rating of the fair value. The bigger the discount, the higher the star rating. Four- and 5-star ratings mean the stock is undervalued, while a 3-star rating means it's fairly valued, and 1- and 2-star stocks are overvalued. When looking for investments, a 5-star stock is generally a better opportunity than a 1-star stock.<br>Fair Value Assessment Date: {fvDate}", unsafe_allow_html=True)
@@ -344,11 +354,20 @@ if st.button("Submit"):
             st.write(profitability_grade)
             st.write(value_grade)
             st.write(yield_on_cost_grade)
-            
+
             ''
 
 #Analysts Ratings
             st.subheader('Analysts Ratings', divider='gray')
+            counts = {
+            'Buy': authors_buy_count,
+            'Sell': authors_sell_count,
+            'Hold': authors_hold_count,
+            'Strong Buy': authors_strongbuy_count,
+            'Strong Sell': authors_strongsell_count
+            }
+            largest_count_type = max(counts, key=counts.get)
+            largest_value = counts[largest_count_type]
             col1, col2, col3 = st.columns([3, 3, 3])
             yf_targetprice_value = 'N/A' if yf_targetprice == 'N/A' else f'${yf_targetprice}'
             yf_mos_value = 'N/A' if yf_mos == 'N/A' else f'{yf_mos:.2f}%'
@@ -365,6 +384,8 @@ if st.button("Submit"):
                 st.markdown(''':orange-background[Seeking Alpha]''')
                 st.write(f'Price Target: {sk_targetprice_fix}')
                 st.write(f'% Difference: {sk_targetprice_mos}')
+                st.write(f'Analyst Consensus: {largest_count_type}')
+                st.write(f'Analyst Count: {largest_value}')
 
             sa_mos_value = 'N/A' if sa_mos == 'N/A' else f'{sa_mos:.2f}%'
             with col3:
