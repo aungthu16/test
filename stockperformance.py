@@ -320,18 +320,24 @@ if st.button("Submit"):
             with column1:
                 st.write("Economic Moat")
                 st.subheader(f'{moat}')
-            fair_value_mos ='N/A' if fair_value =='N/A' else f'{((float(fair_value) - price)/float(fair_value)) * 100:.2f}%'
+            fair_value_mos = 'N/A' if fair_value == 'N/A' else f'{((float(fair_value) - price)/float(fair_value)) * 100:.2f}%'
             fair_value_fix = 'N/A' if fair_value == 'N/A' else f'${float(fair_value):.2f}'
             with column2:
                 st.write("Fair Value")
-                st.subheader(f'{fair_value_fix}')
-                if ((float(fair_value) - price)/float(fair_value)) * 100 < 0:
-                    st.markdown(f'<p style="color:red;">{fair_value_mos}</p>', unsafe_allow_html=True)
+                st.subheader(f'{fair_value_fix}')  
+                if fair_value != 'N/A':  
+                    mos_value = ((float(fair_value) - price)/float(fair_value)) * 100
+                    if mos_value < 0:
+                        st.markdown(f'<p style="color:red;">{fair_value_mos}</p>', unsafe_allow_html=True)
+                    else:
+                        st.markdown(f'<p style="color:green;">{fair_value_mos}</p>', unsafe_allow_html=True)
                 else:
-                    st.markdown(f'<p style="color:green;">{fair_value_mos}</p>', unsafe_allow_html=True)
+                    st.markdown('<p style="color:gray;">N/A</p>', unsafe_allow_html=True)  
             with column3:
                 st.write("Rating")
                 st.subheader(f'{star_rating}')
+            ''
+            ''
             st.write('Moat Assessment Date: ' f'{moatDate}')
             st.write('Fair Value Assessment Date: ' f'{fvDate}')
 
