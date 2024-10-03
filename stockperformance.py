@@ -19,7 +19,7 @@ st.title("Stock Analysis Dashboard")
 def get_stock_data(ticker, apiKey=None):
 
     performance_id = None
-    fair_value = fvDate = moat = moatDate = starRating = 'N/A'
+    fair_value = fvDate = moat = moatDate = starRating = assessment = 'N/A'
     if apiKey:
         try:
             conn = http.client.HTTPSConnection("morning-star.p.rapidapi.com")
@@ -54,6 +54,7 @@ def get_stock_data(ticker, apiKey=None):
             moat = json_data['valuation']['moat']
             moatDate = json_data['valuation']['moatDate']
             starRating = json_data['valuation']['startRating']
+            assessment = json_data['valuation']['assessment']
         except Exception as e:
             st.warning(f"data request failed: {e}")
     
@@ -102,10 +103,6 @@ def get_stock_data(ticker, apiKey=None):
             json_data = json.loads(data.decode("utf-8"))
             get_sk_data = json_data['estimates'][f'{ticker_id}']['target_price']['0'][0]
             sk_targetprice = get_sk_data['dataitemvalue']
-            #if 'estimates' in json_data and f'{ticker_id_str}' in json_data['estimates']:
-                #target_price_data = json_data['estimates'][f'{ticker_id_str}'].get('target_price', {})
-            #if '0' in target_price_data and len(target_price_data['0']) > 0:
-                #sk_targetprice = target_price_data['0'][0].get('dataitemvalue', 'N/A')
         except Exception as e:
             st.warning(f"API request failed: {e}")
 
@@ -183,7 +180,7 @@ def get_stock_data(ticker, apiKey=None):
     sa_price_float = float(sa_analysts_targetprice.replace('$', ''))
     sa_mos = ((sa_price_float - price)/sa_price_float) * 100
 
-    return sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos
+    return assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos
 
 ''
 ''
@@ -200,7 +197,7 @@ st.info('Data provided by Yahoo Finance, Morning Star, and StockAnalysis.com')
 
 if st.button("Submit"):
     try:
-        sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos = get_stock_data(ticker, apiKey if apiKey.strip() else None)
+        assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos = get_stock_data(ticker, apiKey if apiKey.strip() else None)
     
 ############### Profile ###############
 
@@ -310,6 +307,7 @@ if st.button("Submit"):
                 label='Payout Ratio',
                 value=payoutRatio_value
             )
+            ''
 
             #Morning Star Research
             st.subheader('Morningstar Research', divider='gray')
@@ -337,12 +335,15 @@ if st.button("Submit"):
                 st.write("Rating")
                 st.subheader(f'{star_rating}')
             ''
+            st.markdown(f'The stock is currently <span style="color:blue;">{assessment}</span>.', unsafe_allow_html=True)
             ''
-            st.write('Moat Assessment Date: ' f'{moatDate}')
-            st.write('Fair Value Assessment Date: ' f'{fvDate}')
+            st.caption(f"An economic moat refers to a company's ability to maintain competitive advantages to protect its long-term profits and market share from competitors.<br>Moat Assessment Date: {moatDate}", unsafe_allow_html=True)
+            ''
+            st.caption(f"The Star Rating is determined by three factors: a stock's current price, Morningstar's estimate of the stock's fair value, and the uncertainty rating of the fair value. The bigger the discount, the higher the star rating. Four- and 5-star ratings mean the stock is undervalued, while a 3-star rating means it's fairly valued, and 1- and 2-star stocks are overvalued. When looking for investments, a 5-star stock is generally a better opportunity than a 1-star stock.<br>Fair Value Assessment Date: {fvDate}", unsafe_allow_html=True)
+            ''
 
             #Quant Rating
-            st.subheader('Quantitative Analysis', divider = 'gray')
+            st.subheader('Quantitative Analysis [Seeking Alpha]', divider = 'gray')
             st.caption("This section only works with RapidAPI key.")
             st.write(quant_rating)
             st.write(growth_grade)
@@ -350,6 +351,7 @@ if st.button("Submit"):
             st.write(profitability_grade)
             st.write(value_grade)
             st.write(yield_on_cost_grade)
+            ''
 
             #Analysts Ratings
             st.subheader('Analysts Ratings', divider='gray')
@@ -377,6 +379,8 @@ if st.button("Submit"):
                 st.write(f'Difference %: {sa_mos_value}')
                 st.write(f'Analyst Consensus: {sa_analysts_consensus}')
                 st.write(f'Analyst Count: {sa_analysts_count}')
+
+            ''
 
 ############### Statements ###############
 
