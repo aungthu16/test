@@ -189,7 +189,7 @@ def get_stock_data(ticker, apiKey=None):
     sa_price_float = float(sa_analysts_targetprice.replace('$', ''))
     sa_mos = ((sa_price_float - price)/sa_price_float) * 100
 
-    return authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos
+    return authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey
 
 ''
 ''
@@ -206,7 +206,7 @@ st.info('Data provided by Yahoo Finance, Morning Star, and StockAnalysis.com')
 
 if st.button("Submit"):
     try:
-        authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos = get_stock_data(ticker, apiKey if apiKey.strip() else None)
+        authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey = get_stock_data(ticker, apiKey if apiKey.strip() else None)
     
 ############### Profile ###############
 
@@ -311,51 +311,75 @@ if st.button("Submit"):
                 value=payoutRatio_value
             )
             ''
-
+            if apiKey is None:
+                st.info('Some information is hidden due to unavailability of API key')
+            else:
 #Morning Star Research
-            st.subheader('Morningstar Research', divider='gray')
-            st.caption("This section only works with RapidAPI key.")
-            starRating_value = 0 if starRating == 'N/A' else int(starRating)
-            star_rating = ":star:" * int(round(starRating_value, 0))
-            column1, column2, column3 = st.columns(3)
-            with column1:
-                st.write("Economic Moat")
-                st.subheader(f'{moat}')
-            fair_value_mos = 'N/A' if fair_value == 'N/A' else f'{((float(fair_value) - price)/float(fair_value)) * 100:.2f}%'
-            fair_value_fix = 'N/A' if fair_value == 'N/A' else f'${float(fair_value):.2f}'
-            with column2:
-                st.write("Fair Value")
-                st.subheader(f'{fair_value_fix}')  
-                if fair_value != 'N/A':  
-                    mos_value = ((float(fair_value) - price)/float(fair_value)) * 100
-                    if mos_value < 0:
-                        st.markdown(f'<p style="color:red;">{fair_value_mos}</p>', unsafe_allow_html=True)
+                st.subheader('Morningstar Research', divider='gray')
+                st.caption("This section only works with RapidAPI key.")
+                starRating_value = 0 if starRating == 'N/A' else int(starRating)
+                star_rating = ":star:" * int(round(starRating_value, 0))
+                column1, column2, column3 = st.columns(3)
+                with column1:
+                    st.write("Economic Moat")
+                    st.subheader(f'{moat}')
+                fair_value_mos = 'N/A' if fair_value == 'N/A' else f'{((float(fair_value) - price)/float(fair_value)) * 100:.2f}%'
+                fair_value_fix = 'N/A' if fair_value == 'N/A' else f'${float(fair_value):.2f}'
+                with column2:
+                    st.write("Fair Value")
+                    st.subheader(f'{fair_value_fix}')  
+                    if fair_value != 'N/A':  
+                        mos_value = ((float(fair_value) - price)/float(fair_value)) * 100
+                        if mos_value < 0:
+                            st.markdown(f'<p style="color:red;">{fair_value_mos}</p>', unsafe_allow_html=True)
+                        else:
+                            st.markdown(f'<p style="color:green;">{fair_value_mos}</p>', unsafe_allow_html=True)
                     else:
-                        st.markdown(f'<p style="color:green;">{fair_value_mos}</p>', unsafe_allow_html=True)
-                else:
-                    st.markdown('<p style="color:gray;">N/A</p>', unsafe_allow_html=True)  
-            with column3:
-                st.write("Rating")
-                st.subheader(f'{star_rating}')
-            ''
-            #st.markdown(f'Current price of the stock is <span style="color:blue;">{assessment}</span>.', unsafe_allow_html=True)
-            st.write(f'Morningstar Current Assessment: {assessment}')
-            ''
-            st.caption(f"An economic moat refers to a company's ability to maintain competitive advantages to protect its long-term profits and market share from competitors.<br>Moat Assessment Date: {moatDate}", unsafe_allow_html=True)
-            st.caption(f"The Star Rating is determined by three factors: a stock's current price, Morningstar's estimate of the stock's fair value, and the uncertainty rating of the fair value. The bigger the discount, the higher the star rating. Four- and 5-star ratings mean the stock is undervalued, while a 3-star rating means it's fairly valued, and 1- and 2-star stocks are overvalued. When looking for investments, a 5-star stock is generally a better opportunity than a 1-star stock.<br>Fair Value Assessment Date: {fvDate}", unsafe_allow_html=True)
-            ''
+                        st.markdown('<p style="color:gray;">N/A</p>', unsafe_allow_html=True)  
+                with column3:
+                    st.write("Rating")
+                    st.subheader(f'{star_rating}')
+                ''
+                #st.markdown(f'Current price of the stock is <span style="color:blue;">{assessment}</span>.', unsafe_allow_html=True)
+                st.write(f'Morningstar Current Assessment: {assessment}')
+                ''
+                st.caption(f"An economic moat refers to a company's ability to maintain competitive advantages to protect its long-term profits and market share from competitors.<br>Moat Assessment Date: {moatDate}", unsafe_allow_html=True)
+                st.caption(f"The Star Rating is determined by three factors: a stock's current price, Morningstar's estimate of the stock's fair value, and the uncertainty rating of the fair value. The bigger the discount, the higher the star rating. Four- and 5-star ratings mean the stock is undervalued, while a 3-star rating means it's fairly valued, and 1- and 2-star stocks are overvalued. When looking for investments, a 5-star stock is generally a better opportunity than a 1-star stock.<br>Fair Value Assessment Date: {fvDate}", unsafe_allow_html=True)
+                ''
 
 #Quant Rating
-            st.subheader('Seeking Alpha Quantitative Analysis', divider = 'gray')
-            st.caption("This section only works with RapidAPI key.")
-            st.write(quant_rating)
-            st.write(growth_grade)
-            st.write(momentum_grade)
-            st.write(profitability_grade)
-            st.write(value_grade)
-            st.write(yield_on_cost_grade)
+                st.subheader('Seeking Alpha Quantitative Analysis', divider = 'gray')
+                st.caption("This section only works with RapidAPI key.")
+                cols = st.columns(3)
+                quant_rating_value = 'N/A' if quant_rating == 'N/A' else f'{quant_rating:.2f}'
+                cols[0].metric(
+                    label='Quant Rating',
+                    value=quant_rating_value
+                )
+                cols[1].metric(
+                    label='Growth Grade',
+                    value=growth_grade
+                )
+                cols[2].metric(
+                    label='Momentum Grade',
+                    value=momentum_grade
+                )
 
-            ''
+                cols = st.columns(3)
+                cols[0].metric(
+                    label='Profitability Grade',
+                    value=profitability_grade
+                )
+                cols[1].metric(
+                    label='Value Grade',
+                    value=value_grade
+                )
+                cols[2].metric(
+                    label='Yield on Cost Grade',
+                    value=yield_on_cost_grade
+                )
+
+                ''
 
 #Analysts Ratings
             st.subheader('Analysts Ratings', divider='gray')
