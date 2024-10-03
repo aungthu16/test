@@ -311,6 +311,30 @@ if st.button("Submit"):
                 value=payoutRatio_value
             )
 
+            #Morning Star Research
+            st.subheader('Morningstar Research', divider='gray')
+            st.caption("This section only works with RapidAPI key.")
+            starRating_value = 0 if starRating == 'N/A' else int(starRating)
+            star_rating = ":star:" * int(round(starRating_value, 0))
+            column1, column2, column3 = st.columns(3)
+            with column1:
+                st.write("Economic Moat")
+                st.subheader(f'{moat}')
+            fair_value_mos ='N/A' if fair_value =='N/A' else f'{((float(fair_value) - price)/float(fair_value)) * 100:.2f}%'
+            fair_value_fix = 'N/A' if fair_value == 'N/A' else f'${float(fair_value):.2f}'
+            with column2:
+                st.write("Fair Value")
+                st.subheader(f'{fair_value_fix}')
+                if fair_value_mos < 0:
+                    st.markdown(f'<p style="color:red;">{fair_value_mos}</p>', unsafe_allow_html=True)
+                else:
+                    st.markdown(f'<p style="color:green;">{fair_value_mos}</p>', unsafe_allow_html=True)
+            with column3:
+                st.write("Rating")
+                st.subheader(f'{star_rating}')
+            st.write('Moat Assessment Date: ' f'{moatDate}')
+            st.write('Fair Value Assessment Date: ' f'{fvDate}')
+
             #Quant Rating
             st.subheader('Quantitative Analysis', divider = 'gray')
             st.caption("This section only works with RapidAPI key.")
@@ -320,28 +344,6 @@ if st.button("Submit"):
             st.write(profitability_grade)
             st.write(value_grade)
             st.write(yield_on_cost_grade)
-            st.write(sk_targetprice)
-
-            #Morning Star Research
-            st.subheader('Morningstar Research', divider='gray')
-            st.caption("This section only works with RapidAPI key.")
-            starRating_value = 0 if starRating == 'N/A' else int(starRating)
-            star_rating = ":star:" * int(round(starRating_value, 0))
-            column1, column2, column3 = st.columns(3)
-            with column1:
-                st.caption("Economic Moat")
-                st.subheader(f'{moat}')
-            fair_value_mos ='N/A' if fair_value =='N/A' else f'{((float(fair_value) - price)/float(fair_value)) * 100:.2f}%'
-            fair_value_fix = 'N/A' if fair_value == 'N/A' else f'${float(fair_value)}'
-            with column2:
-                st.caption("Fair Value")
-                st.subheader(f'{fair_value_fix}')
-                st.write(f'{fair_value_mos}')
-            with column3:
-                st.caption("Rating")
-                st.subheader(f'{star_rating}')
-            st.write('Moat Assessment Date: ' f'{moatDate}')
-            st.write('Fair Value Assessment Date: ' f'{fvDate}')
 
             #Analysts Ratings
             st.subheader('Analysts Ratings', divider='gray')
