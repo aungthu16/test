@@ -359,15 +359,19 @@ if st.button("Submit"):
 
 #Analysts Ratings
             st.subheader('Analysts Ratings', divider='gray')
-            counts = {
-            'Buy': authors_buy_count,
-            'Sell': authors_sell_count,
-            'Hold': authors_hold_count,
-            'Strong Buy': authors_strongbuy_count,
-            'Strong Sell': authors_strongsell_count
-            }
-            largest_count_type = max(counts, key=counts.get)
-            largest_value = counts[largest_count_type]
+            try:
+                counts = {
+                'Buy': authors_buy_count,
+                'Sell': authors_sell_count,
+                'Hold': authors_hold_count,
+                'Strong Buy': authors_strongbuy_count,
+                'Strong Sell': authors_strongsell_count
+                }
+                largest_count_type = max(counts, key=counts.get)
+                largest_value = round(counts[largest_count_type])
+            except Exception as e:
+                largest_count_type = 'N/A'
+                largest_value = 'N/A'
             col1, col2, col3 = st.columns([3, 3, 3])
             yf_targetprice_value = 'N/A' if yf_targetprice == 'N/A' else f'${yf_targetprice}'
             yf_mos_value = 'N/A' if yf_mos == 'N/A' else f'{yf_mos:.2f}%'
@@ -385,7 +389,7 @@ if st.button("Submit"):
                 st.write(f'Price Target: {sk_targetprice_fix}')
                 st.write(f'% Difference: {sk_targetprice_mos}')
                 st.write(f'Analyst Consensus: {largest_count_type}')
-                st.write(f'Analyst Count: {round(largest_value)}')
+                st.write(f'Analyst Count: {largest_value}')
 
             sa_mos_value = 'N/A' if sa_mos == 'N/A' else f'{sa_mos:.2f}%'
             with col3:
