@@ -327,23 +327,19 @@ if st.button("Submit"):
             st.caption("This section only works with RapidAPI key.")
             starRating_value = 0 if starRating == 'N/A' else int(starRating)
             star_rating = ":star:" * int(round(starRating_value, 0))
-            mscol = st.columns(3)
-            mscol[0].metric(
-                label='Economic Moat',
-                value=moat,
-            )
+            column1, column2, column3 = st.columns(3)
+            with column1:
+                st.caption("Economic Moat")
+                st.subheader(f'{moat}')
             fair_value_mos ='N/A' if fair_value =='N/A' else f'{((float(fair_value) - price)/float(fair_value)) * 100:.2f}%'
             fair_value_fix = 'N/A' if fair_value == 'N/A' else f'${float(fair_value)}'
-            mscol[1].metric(
-                label='Fair Value',
-                value=fair_value_fix,
-                delta=fair_value_mos,
-                delta_color='normal' 
-            )
-            mscol[2].metric(
-                label='Rating',
-                value=star_rating
-            )
+            with column2:
+                st.caption("Fair Value")
+                st.subheader(f'{fair_value_fix}')
+                st.write(f'{fair_value_mos}')
+            with column3:
+                st.caption("Rating")
+                st.subheader(f'{star_rating}')
             st.write('Moat Assessment Date: ' f'{moatDate}')
             st.write('Fair Value Assessment Date: ' f'{fvDate}')
 
