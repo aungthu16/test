@@ -90,18 +90,19 @@ def get_stock_data(ticker, apiKey=None):
         
     sk_targetprice = 'N/A'
     if apiKey:
+        ticker_id_str = str(ticker_id)
         try:
             conn = http.client.HTTPSConnection("seeking-alpha.p.rapidapi.com")
             headers = {
                 'x-rapidapi-key': apiKey,
                 'x-rapidapi-host': "seeking-alpha.p.rapidapi.com"
             }
-            conn.request("GET", "/symbols/get-analyst-price-target?ticker_ids=" + ticker_id + "&return_window=1&group_by_month=false", headers=headers)
+            conn.request("GET", "/symbols/get-analyst-price-target?ticker_ids=" + ticker_id_str + "&return_window=1&group_by_month=false", headers=headers)
             res = conn.getresponse()
             data = res.read()
             json_data = json.loads(data.decode("utf-8"))
-            if 'estimates' in json_data and f'{ticker_id}' in json_data['estimates']:
-                target_price_data = json_data['estimates'][f'{ticker_id}'].get('target_price', {})
+            if 'estimates' in json_data and f'{ticker_id_str}' in json_data['estimates']:
+                target_price_data = json_data['estimates'][f'{ticker_id_str}'].get('target_price', {})
             if '0' in target_price_data and len(target_price_data['0']) > 0:
                 sk_targetprice = target_price_data['0'][0].get('dataitemvalue', 'N/A')
         except Exception as e:
