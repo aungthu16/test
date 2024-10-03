@@ -9,12 +9,11 @@ import json
 import pandas as pd
 import plotly.graph_objects as go
 
-st.set_page_config(page_title='Stock Analysis Dashboard',
-                   page_icon=':chart_with_upwards_trend:'
+st.set_page_config(page_title='Stock Analysis Dashboard'
 )
 
 st.title("Stock Analysis Dashboard")
-''
+
 @st.cache_data
 def get_stock_data(ticker, apiKey=None):
 
@@ -202,13 +201,10 @@ if st.button("Submit"):
 ############### Profile ###############
 
         st.header(f'{name}', divider='gray')
-
         ''
         ''
-
         employee_value = 'N/A' if employee == 'N/A' else f'{employee:,}'
         marketCap_value = 'N/A' if marketCap == 'N/A' else f'${marketCap/1000000:,.2f}'
-
         col1, col2 = st.columns([2, 3])
         with col1:
             st.markdown(f"""
@@ -216,7 +212,6 @@ if st.button("Submit"):
                 <img src='{picture_url}' width='100'>
             </div>
             """, unsafe_allow_html=True)
-
         with col2:
             st.markdown(f"""
             <div style='float: left; width: 100%;'>
@@ -247,21 +242,19 @@ if st.button("Submit"):
             label='Owned by Institutions',
             value=institutionsPct_value
         )
-
         st.markdown(f"<div style='text-align: justify;'>{longProfile}</div>", unsafe_allow_html=True)
-
         ''
         ''
 
 ############### Tabs ###############
 
-        overview_data, comparison_data, statements_data, sustainability_data, news_data, technicalAnalysis_data = st.tabs (["Overview","Comparisons","Statement","Sustainability","Top 10 news", "Technical Analysis"])
+        overview_data, comparison_data, statements_data, sustainability_data, news_data, technicalAnalysis_data = st.tabs (["Overview","Comparisons","Statement","Sustainability","Top 10 news","Technical Analysis"])
 
 ############### Overview Data ###############
 
         with overview_data:
 
-            #Stock Performance
+#Stock Performance
             st.subheader('Stock Performance', divider='gray')
             cols = st.columns(4)
             cols[0].metric(
@@ -309,7 +302,7 @@ if st.button("Submit"):
             )
             ''
 
-            #Morning Star Research
+#Morning Star Research
             st.subheader('Morningstar Research', divider='gray')
             st.caption("This section only works with RapidAPI key.")
             starRating_value = 0 if starRating == 'N/A' else int(starRating)
@@ -335,15 +328,15 @@ if st.button("Submit"):
                 st.write("Rating")
                 st.subheader(f'{star_rating}')
             ''
-            st.markdown(f'The stock is currently <span style="color:blue;">{assessment}</span>.', unsafe_allow_html=True)
+            #st.markdown(f'Current price of the stock is <span style="color:blue;">{assessment}</span>.', unsafe_allow_html=True)
+            st.write(f'Current price of the stock is {assessment}.')
             ''
             st.caption(f"An economic moat refers to a company's ability to maintain competitive advantages to protect its long-term profits and market share from competitors.<br>Moat Assessment Date: {moatDate}", unsafe_allow_html=True)
-            ''
             st.caption(f"The Star Rating is determined by three factors: a stock's current price, Morningstar's estimate of the stock's fair value, and the uncertainty rating of the fair value. The bigger the discount, the higher the star rating. Four- and 5-star ratings mean the stock is undervalued, while a 3-star rating means it's fairly valued, and 1- and 2-star stocks are overvalued. When looking for investments, a 5-star stock is generally a better opportunity than a 1-star stock.<br>Fair Value Assessment Date: {fvDate}", unsafe_allow_html=True)
             ''
 
-            #Quant Rating
-            st.subheader('Quantitative Analysis [Seeking Alpha]', divider = 'gray')
+#Quant Rating
+            st.subheader('Seeking Alpha Quantitative Analysis', divider = 'gray')
             st.caption("This section only works with RapidAPI key.")
             st.write(quant_rating)
             st.write(growth_grade)
@@ -351,9 +344,10 @@ if st.button("Submit"):
             st.write(profitability_grade)
             st.write(value_grade)
             st.write(yield_on_cost_grade)
+            
             ''
 
-            #Analysts Ratings
+#Analysts Ratings
             st.subheader('Analysts Ratings', divider='gray')
             col1, col2, col3 = st.columns([3, 3, 3])
             yf_targetprice_value = 'N/A' if yf_targetprice == 'N/A' else f'${yf_targetprice}'
@@ -361,7 +355,7 @@ if st.button("Submit"):
             with col1:
                 st.markdown(''':violet-background[Yahoo Finance]''')
                 st.write(f'Price Target: {yf_targetprice_value}')
-                st.write(f'Difference %: {yf_mos_value}')
+                st.write(f'% Difference: {yf_mos_value}')
                 st.write(f'Analyst Consensus: {yf_consensus}')
                 st.write(f'Analyst Count: {yf_analysts_count}')
             
@@ -370,13 +364,13 @@ if st.button("Submit"):
             with col2:
                 st.markdown(''':orange-background[Seeking Alpha]''')
                 st.write(f'Price Target: {sk_targetprice_fix}')
-                st.write(f'Difference %: {sk_targetprice_mos}')
+                st.write(f'% Difference: {sk_targetprice_mos}')
 
             sa_mos_value = 'N/A' if sa_mos == 'N/A' else f'{sa_mos:.2f}%'
             with col3:
                 st.markdown(''':blue-background[Stockanalysis.com]''')
                 st.write(f'Price Target: {sa_analysts_targetprice}')
-                st.write(f'Difference %: {sa_mos_value}')
+                st.write(f'% Difference: {sa_mos_value}')
                 st.write(f'Analyst Consensus: {sa_analysts_consensus}')
                 st.write(f'Analyst Count: {sa_analysts_count}')
 
@@ -416,7 +410,7 @@ if st.button("Submit"):
             st.subheader("Sustainability", divider = 'gray')
             #st.caption("This section shows the ESG risk ratings of '" + name + "' .")
 
-            #Gauge Plot
+#Gauge Plot
             def plot_gauge():
                 totalEsg_value = 0.00 if totalEsg == 'N/A' else totalEsg
                 max_value = 100
@@ -446,7 +440,7 @@ if st.button("Submit"):
             with middle_column:
                 plot_gauge()
             
-            #Risk Scores
+#Risk Scores
             esgcol1 = st.columns(3)
             esgcol1[0].metric(
                 label='Environmental Risk',
@@ -460,13 +454,14 @@ if st.button("Submit"):
                 label='Governance Risk',
                 value=governScore
             )
-
-            #Descriptions
+            ''
+#Descriptions
             st.caption("Notes:")
-            st.write("Total ESG Risk: Companies with ESG scores closer to 100 are considered to have significant ESG-related risks and challenges that could potentially harm their long-term sustainability.")
-            st.write("Environmental Risk: This reflects the company’s impact on the environment. e.g. carbon emissions, waste management, energy efficiency.")
-            st.write("Social Risk: This measures the company’s relationships with employees, suppliers, customers, and the community. e.g. human rights, labor practices, diversity, and community engagement.")
-            st.write("Governance Risk: this focuses on the company’s leadership, audit practices, internal controls, and shareholder rights. e.g. transparent financial reporting and strong board oversight.")
+            ''
+            st.caption("Total ESG Risk: Companies with ESG scores closer to 100 are considered to have significant ESG-related risks and challenges that could potentially harm their long-term sustainability.")
+            st.caption("Environmental Risk: This reflects the company’s impact on the environment. e.g. carbon emissions, waste management, energy efficiency.")
+            st.caption("Social Risk: This measures the company’s relationships with employees, suppliers, customers, and the community. e.g. human rights, labor practices, diversity, and community engagement.")
+            st.caption("Governance Risk: this focuses on the company’s leadership, audit practices, internal controls, and shareholder rights. e.g. transparent financial reporting and strong board oversight.")
 
 ############### News Data ###############
 
