@@ -325,7 +325,7 @@ if st.button("Submit"):
             with column2:
                 st.write("Fair Value")
                 st.subheader(f'{fair_value_fix}')
-                if fair_value_mos < 0:
+                if int(fair_value_mos) < 0:
                     st.markdown(f'<p style="color:red;">{fair_value_mos}</p>', unsafe_allow_html=True)
                 else:
                     st.markdown(f'<p style="color:green;">{fair_value_mos}</p>', unsafe_allow_html=True)
