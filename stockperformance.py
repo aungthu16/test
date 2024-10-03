@@ -89,7 +89,7 @@ def get_stock_data(ticker, apiKey=None):
             st.warning(f"API request failed: {e}")
         
     sk_targetprice = 'N/A'
-    if apiKey:
+    if apiKey and ticker_id and ticker_id != 'N/A':
         ticker_id_str = str(ticker_id)
         try:
             conn = http.client.HTTPSConnection("seeking-alpha.p.rapidapi.com")
@@ -101,10 +101,12 @@ def get_stock_data(ticker, apiKey=None):
             res = conn.getresponse()
             data = res.read()
             json_data = json.loads(data.decode("utf-8"))
-            if 'estimates' in json_data and f'{ticker_id_str}' in json_data['estimates']:
-                target_price_data = json_data['estimates'][f'{ticker_id_str}'].get('target_price', {})
-            if '0' in target_price_data and len(target_price_data['0']) > 0:
-                sk_targetprice = target_price_data['0'][0].get('dataitemvalue', 'N/A')
+            get_sk_data = json_data['estimates'][f'{ticker_id}']['target_price']['0'][0]
+            sk_targetprice = get_sk_data['dataitemvalue']
+            #if 'estimates' in json_data and f'{ticker_id_str}' in json_data['estimates']:
+                #target_price_data = json_data['estimates'][f'{ticker_id_str}'].get('target_price', {})
+            #if '0' in target_price_data and len(target_price_data['0']) > 0:
+                #sk_targetprice = target_price_data['0'][0].get('dataitemvalue', 'N/A')
         except Exception as e:
             st.warning(f"API request failed: {e}")
 
