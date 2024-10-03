@@ -9,9 +9,8 @@ import json
 import pandas as pd
 import plotly.graph_objects as go
 
-st.set_page_config(
-    page_title='Stock Analysis Dashboard',
-    page_icon=':chart_with_upwards_trend:',
+st.set_page_config(page_title='Stock Analysis Dashboard',
+                   page_icon=':chart_with_upwards_trend:'
 )
 
 st.title("Stock Analysis Dashboard")
@@ -326,6 +325,8 @@ if st.button("Submit"):
             #Morning Star Research
             st.subheader('Morningstar Research', divider='gray')
             st.caption("This section only works with RapidAPI key.")
+            starRating_value = 0 if starRating == 'N/A' else int(starRating)
+            star_rating = ":star:" * int(round(starRating_value, 0))
             mscol = st.columns(3)
             mscol[0].metric(
                 label='Economic Moat',
@@ -341,30 +342,37 @@ if st.button("Submit"):
             )
             mscol[2].metric(
                 label='Rating',
-                value=starRating
+                value=star_rating
             )
             st.write('Moat Assessment Date: ' f'{moatDate}')
             st.write('Fair Value Assessment Date: ' f'{fvDate}')
 
             #Analysts Ratings
             st.subheader('Analysts Ratings', divider='gray')
-            col1, col2 = st.columns([3, 3])
-            sa_mos_value = 'N/A' if sa_mos == 'N/A' else f'{sa_mos:.2f}%'
-            with col1:
-                st.write('stockanalysis.com')
-                st.write(f'Price Target: {sa_analysts_targetprice}')
-                st.write(f'Difference %: {sa_mos_value}')
-                st.write(f'Analyst Consensus: {sa_analysts_consensus}')
-                st.write(f'Analyst Count: {sa_analysts_count}')
-
+            col1, col2, col3 = st.columns([3, 3, 3])
             yf_targetprice_value = 'N/A' if yf_targetprice == 'N/A' else f'${yf_targetprice}'
             yf_mos_value = 'N/A' if yf_mos == 'N/A' else f'{yf_mos:.2f}%'
-            with col2:
-                st.write('Yahoo Finance')
+            with col1:
+                st.markdown(''':violet-background[Yahoo Finance]''')
                 st.write(f'Price Target: {yf_targetprice_value}')
                 st.write(f'Difference %: {yf_mos_value}')
                 st.write(f'Analyst Consensus: {yf_consensus}')
                 st.write(f'Analyst Count: {yf_analysts_count}')
+            
+            sk_targetprice_fix = 'N/A' if sk_targetprice == 'N/A' else f'${float(sk_targetprice):.2f}'
+            sk_targetprice_mos ='N/A' if sk_targetprice =='N/A' else f'{((float(sk_targetprice) - price)/float(sk_targetprice)) * 100:.2f}%'
+            with col2:
+                st.markdown(''':orange-background[Seeking Alpha]''')
+                st.write(f'Price Target: {sk_targetprice_fix}')
+                st.write(f'Difference %: {sk_targetprice_mos}')
+
+            sa_mos_value = 'N/A' if sa_mos == 'N/A' else f'{sa_mos:.2f}%'
+            with col3:
+                st.markdown(''':blue-background[Stockanalysis.com]''')
+                st.write(f'Price Target: {sa_analysts_targetprice}')
+                st.write(f'Difference %: {sa_mos_value}')
+                st.write(f'Analyst Consensus: {sa_analysts_consensus}')
+                st.write(f'Analyst Count: {sa_analysts_count}')
 
 ############### Statements ###############
 
