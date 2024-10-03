@@ -100,8 +100,10 @@ def get_stock_data(ticker, apiKey=None):
             res = conn.getresponse()
             data = res.read()
             json_data = json.loads(data.decode("utf-8"))
-            get_sk_data = json_data['estimates'][f'{ticker_id}']['target_price']['0'][0]
-            sk_targetprice = get_sk_data['dataitemvalue']
+            if 'estimates' in json_data and f'{ticker_id}' in json_data['estimates']:
+                target_price_data = json_data['estimates'][f'{ticker_id}'].get('target_price', {})
+            if '0' in target_price_data and len(target_price_data['0']) > 0:
+                sk_targetprice = target_price_data['0'][0].get('dataitemvalue', 'N/A')
         except Exception as e:
             st.warning(f"API request failed: {e}")
 
@@ -316,6 +318,7 @@ if st.button("Submit"):
             st.write(profitability_grade)
             st.write(value_grade)
             st.write(yield_on_cost_grade)
+            st.write(sk_targetprice)
 
             #Morning Star Research
             st.subheader('Morningstar Research', divider='gray')
