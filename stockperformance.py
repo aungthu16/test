@@ -385,7 +385,7 @@ if st.button("Submit"):
                 st.write(f'Price Target: {sk_targetprice_fix}')
                 st.write(f'% Difference: {sk_targetprice_mos}')
                 st.write(f'Analyst Consensus: {largest_count_type}')
-                st.write(f'Analyst Count: {largest_value}')
+                st.write(f'Analyst Count: {round(largest_value)}')
 
             sa_mos_value = 'N/A' if sa_mos == 'N/A' else f'{sa_mos:.2f}%'
             with col3:
