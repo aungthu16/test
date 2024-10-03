@@ -14,7 +14,7 @@ st.set_page_config(page_title='Stock Analysis Dashboard',
 )
 
 st.title("Stock Analysis Dashboard")
-
+''
 @st.cache_data
 def get_stock_data(ticker, apiKey=None):
 
