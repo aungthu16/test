@@ -518,8 +518,8 @@ if st.button("Submit"):
                 color=alt.Color('Key Values:N', sort=income_items), 
                 xOffset=alt.XOffset('Key Values:N', sort=income_items)
             ).properties(
-                width=600,
-                height=400,
+                #width=600,
+                #height=400,
                 title='Income Statement Key Values Chart'
             ).configure_axisX(
                 labelAngle=-45
@@ -551,8 +551,8 @@ if st.button("Submit"):
                 color=alt.Color('Key Values:N', sort=balance_items), 
                 xOffset=alt.XOffset('Key Values:N', sort=balance_items)
             ).properties(
-                width=600,
-                height=400,
+                #width=600,
+                #height=400,
                 title='Balance Sheet Key Values Chart'
             ).configure_axisX(
                 labelAngle=-45
@@ -584,8 +584,8 @@ if st.button("Submit"):
                 color=alt.Color('Key Values:N', sort=cashflow_items), 
                 xOffset=alt.XOffset('Key Values:N', sort=cashflow_items)
             ).properties(
-                width=600,
-                height=400,
+                #width=600,
+                #height=400,
                 title='Cashflow Statement Key Values Chart'
             ).configure_axisX(
                 labelAngle=-45
