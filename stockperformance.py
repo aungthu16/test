@@ -8,6 +8,8 @@ import http.client
 import json
 import pandas as pd
 import plotly.graph_objects as go
+import altair as alt
+import datetime
 
 st.set_page_config(page_title='Stock Analysis Dashboard'
 )
@@ -171,6 +173,16 @@ def get_stock_data(ticker, apiKey=None):
     dividendYield = stock.info.get('dividendYield', 'N/A')
     payoutRatio = stock.info.get('payoutRatio', 'N/A')
     sharesOutstanding = stock.info.get('sharesOutstanding', 'N/A')
+    pbRatio = stock.info.get('priceToBook','N/A')
+    deRatio = stock.info.get('debtToEquity','N/A')
+    dividends = stock.info.get('dividendRate','N/A')
+    dividend_history = stock.dividends
+    exDividendDate = stock.info.get('exDividendDate','N/A')
+    get_earningsDate = stock.calendar['Earnings Date']
+    if get_earningsDate:
+        earningsDate = get_earningsDate[0].strftime('%Y-%m-%d')
+    else:
+        earningsDate = 'N/A'
     try:
         totalEsg = stock.sustainability.loc['totalEsg', 'esgScores']
         enviScore = stock.sustainability.loc['environmentScore', 'esgScores']
@@ -189,7 +201,7 @@ def get_stock_data(ticker, apiKey=None):
     sa_price_float = float(sa_analysts_targetprice.replace('$', ''))
     sa_mos = ((sa_price_float - price)/sa_price_float) * 100
 
-    return authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey
+    return earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey
 
 ''
 ''
@@ -206,7 +218,7 @@ st.info('Data provided by Yahoo Finance, Morning Star, and StockAnalysis.com')
 
 if st.button("Submit"):
     try:
-        authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey = get_stock_data(ticker, apiKey if apiKey.strip() else None)
+        earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey = get_stock_data(ticker, apiKey if apiKey.strip() else None)
     
 ############### Profile ###############
 
@@ -229,9 +241,10 @@ if st.button("Submit"):
                     <tr><td><strong>Sector</strong></td><td>{sector}</td></tr>
                     <tr><td><strong>Industry</strong></td><td>{industry}</td></tr>
                     <tr><td><strong>Employees</strong></td><td>{employee_value}</td></tr>
-                    <tr><td><strong>Market Cap</strong></td><td>{marketCap_value}</td></tr>
+                    <tr><td><strong>Market Cap</strong></td><td>{marketCap_value} Millions</td></tr>
                     <tr><td><strong>Country</strong></td><td>{country}</td></tr>
                     <tr><td><strong>Website</strong></td><td>{website}</td></tr>
+                    <tr><td><strong>Earnings Date</strong></td><td>{earningsDate}</td></tr>
                 </table>
             </div>
             """, unsafe_allow_html=True)
@@ -258,7 +271,7 @@ if st.button("Submit"):
 
 ############### Tabs ###############
 
-        overview_data, comparison_data, statements_data, sustainability_data, news_data, technicalAnalysis_data = st.tabs (["Overview","Comparisons","Statement","Sustainability","Top 10 news","Technical Analysis"])
+        overview_data, comparison_data, statements_data, sustainability_data, news_data, technicalAnalysis_data = st.tabs (["Overview","Comparisons","Financial Statements","Sustainability","Top 10 news","Technical Analysis"])
 
 ############### Overview Data ###############
 
@@ -268,7 +281,7 @@ if st.button("Submit"):
             st.subheader('Stock Performance', divider='gray')
             cols = st.columns(4)
             cols[0].metric(
-                label=f'{ticker.upper()} Current Price',
+                label='Current Price',
                 value=f'${price:,.2f}',
                 delta=f'{change_dollar:,.2f} ({change_percent:.2f}%)',
                 delta_color='normal' 
@@ -300,19 +313,21 @@ if st.button("Submit"):
                 label='Forward PE',
                 value=forwardPe_value
             )
-            dividendyield_value = 'N/A' if dividendYield == 'N/A' else f'{dividendYield*100:.2f}%'
+            pbRatio_value = 'N/A' if pbRatio == 'N/A' else f'{pbRatio:.2f}'
             cols1[2].metric(
-                label='Dividend Yield',
-                value=dividendyield_value
+                label='PB Ratio',
+                value=pbRatio_value
             )
-            payoutRatio_value = 'N/A' if payoutRatio == 'N/A' else f'{payoutRatio:.2f}'
+            deRatio_value = 'N/A' if deRatio == 'N/A' else f'{deRatio/100:.2f}'
             cols1[3].metric(
-                label='Payout Ratio',
-                value=payoutRatio_value
+                label='DE Ratio',
+                value=deRatio_value
             )
             ''
             if apiKey is None:
-                st.info('Some information is hidden due to unavailability of API key')
+                #st.markdown("---")
+                st.warning('Certain information will be hidden due to unavailability of API key. Please input your API key to access the full data.')
+                #st.markdown("---")
             else:
 #Morning Star Research
                 st.subheader('Morningstar Research', divider='gray')
@@ -378,8 +393,53 @@ if st.button("Submit"):
                     label='Yield on Cost Grade',
                     value=yield_on_cost_grade
                 )
-
                 ''
+
+#Dividend data
+            st.subheader('Dividends & Yields', divider='gray')
+            if dividendYield == 'N/A':
+                st.write(f'{name} has no dividend data.')
+            else:
+                col1, col2 = st.columns([1, 3])
+                with col1:
+                    dividends_value = 'N/A' if dividends == 'N/A' else f'${dividends:,.2f}'
+                    st.metric(
+                        label='Dividend per share',
+                        value=dividends_value
+                    )
+                    dividendYield_value = 'N/A' if dividendYield == 'N/A' else f'{dividendYield*100:.2f}%'
+                    st.metric(
+                        label='Dividend Yield',
+                        value=dividendYield_value
+                    )
+                    payoutRatio_value = 'N/A' if payoutRatio == 'N/A' else f'{payoutRatio:.2f}'
+                    st.metric(
+                        label='Payout Ratio',
+                        value=payoutRatio_value
+                    )
+                    if exDividendDate == 'N/A':
+                        exDividendDate_value = 'N/A'
+                    else:
+                        exDate = datetime.datetime.fromtimestamp(exDividendDate)
+                        exDividendDate_value = exDate.strftime('%Y-%m-%d')
+                    st.metric(
+                        label='Ex-Dividend Date',
+                        value=exDividendDate_value
+                    )
+                with col2:
+                    data_yearly = dividend_history.resample('Y').sum().reset_index()
+                    data_yearly['Year'] = data_yearly['Date'].dt.year
+                    data_yearly = data_yearly[['Year', 'Dividends']]
+                    if dividends != 'N/A':
+                        data_yearly.loc[data_yearly.index[-1], 'Dividends'] = dividends
+                    chart = alt.Chart(data_yearly).mark_bar().encode(
+                        x=alt.X('Year:O', title='Year'), 
+                        y=alt.Y('Dividends', title='Dividends (USD)'),
+                        tooltip=['Year:O', 'Dividends']
+                    ).properties(
+                        title='Dividends History'
+                    )
+                    st.altair_chart(chart, use_container_width=True)
 
 #Analysts Ratings
             st.subheader('Analysts Ratings', divider='gray')
@@ -422,7 +482,6 @@ if st.button("Submit"):
                 st.write(f'% Difference: {sa_mos_value}')
                 st.write(f'Analyst Consensus: {sa_analysts_consensus}')
                 st.write(f'Analyst Count: {sa_analysts_count}')
-
             ''
 
 ############### Statements ###############
@@ -433,7 +492,106 @@ if st.button("Submit"):
 ############### Statements ###############
 
         with statements_data:
-            st.write("Statements")
+            tickerdataframe = yf.Ticker(ticker)
+#Income Statement
+            income_statement = tickerdataframe.income_stmt
+            quarterly_income_statement = tickerdataframe.quarterly_income_stmt
+            st.subheader("Income Statement", divider ='gray')
+            ttm = quarterly_income_statement.iloc[:, :4].sum(axis=1)
+            income_statement.insert(0, 'TTM', ttm)
+            income_statement_flipped = income_statement.iloc[::-1]
+            formatted_columns = [col.strftime('%Y-%m-%d') if isinstance(col, pd.Timestamp) else col for col in income_statement_flipped.columns]
+            income_statement_flipped.columns = formatted_columns
+            st.dataframe(income_statement_flipped)
+            ''
+#Income Statement Bar chart
+            #st.subheader("Income Statement Key Values Chart", divider ='gray')
+            income_items = ['Total Revenue', 'Gross Profit', 'Operating Income', 'Net Income', 'EBITDA']
+            income_bar_data = income_statement_flipped.loc[income_items].transpose()
+            income_bar_data_million = income_bar_data / 1e6
+            income_bar_data_million = income_bar_data_million.reset_index().rename(columns={'index': 'Date'})
+            income_bar_data_melted = income_bar_data_million.melt('Date', var_name='Key Values', value_name='USD in Million')
+            income_bar_data_melted['Key Values'] = pd.Categorical(income_bar_data_melted['Key Values'], categories=income_items, ordered=True)
+            chart = alt.Chart(income_bar_data_melted).mark_bar().encode(
+                x=alt.X('Date:O', title='Date'),
+                y=alt.Y('USD in Million:Q', title='USD in Million'),
+                color=alt.Color('Key Values:N', sort=income_items), 
+                xOffset=alt.XOffset('Key Values:N', sort=income_items)
+            ).properties(
+                width=600,
+                height=400,
+                title='Income Statement Key Values Chart'
+            ).configure_axisX(
+                labelAngle=-45
+            )
+            st.altair_chart(chart, use_container_width=True)
+            ''
+#Balance Sheet
+            balance_sheet = tickerdataframe.balance_sheet
+            quarterly_balance_sheet = tickerdataframe.quarterly_balance_sheet
+            st.subheader("Balance Sheet", divider ='gray')
+            ttm = quarterly_balance_sheet.iloc[:, :4].sum(axis=1)
+            balance_sheet.insert(0, 'TTM', ttm)
+            balance_sheet_flipped = balance_sheet.iloc[::-1]
+            formatted_columns2 = [col.strftime('%Y-%m-%d') if isinstance(col, pd.Timestamp) else col for col in balance_sheet_flipped.columns]
+            balance_sheet_flipped.columns = formatted_columns2
+            st.dataframe(balance_sheet_flipped)
+            ''
+#Balance Sheet Bar chart
+            #st.subheader("Balance Sheet Key Values Chart", divider ='gray')
+            balance_items = ['Cash And Cash Equivalents','Total Assets', 'Total Liabilities Net Minority Interest', 'Stockholders Equity']
+            balance_bar_data = balance_sheet_flipped.loc[balance_items].transpose()
+            balance_bar_data_million = balance_bar_data / 1e6
+            balance_bar_data_million = balance_bar_data_million.reset_index().rename(columns={'index': 'Date'})
+            balance_bar_data_melted = balance_bar_data_million.melt('Date', var_name='Key Values', value_name='USD in Million')
+            balance_bar_data_melted['Key Values'] = pd.Categorical(balance_bar_data_melted['Key Values'], categories=balance_items, ordered=True)
+            chart2 = alt.Chart(balance_bar_data_melted).mark_bar().encode(
+                x=alt.X('Date:O', title='Date'),
+                y=alt.Y('USD in Million:Q', title='USD in Million'),
+                color=alt.Color('Key Values:N', sort=balance_items), 
+                xOffset=alt.XOffset('Key Values:N', sort=balance_items)
+            ).properties(
+                width=600,
+                height=400,
+                title='Balance Sheet Key Values Chart'
+            ).configure_axisX(
+                labelAngle=-45
+            )
+            st.altair_chart(chart2, use_container_width=True)
+            ''
+#Cashflow Statement
+            cashflow_statement = tickerdataframe.cashflow
+            quarterly_cashflow_statement = tickerdataframe.quarterly_cashflow
+            st.subheader("Cashflow Statement", divider ='gray')
+            ttm = quarterly_cashflow_statement.iloc[:, :4].sum(axis=1)
+            cashflow_statement.insert(0, 'TTM', ttm)
+            cashflow_statement_flipped = cashflow_statement.iloc[::-1]
+            formatted_columns3 = [col.strftime('%Y-%m-%d') if isinstance(col, pd.Timestamp) else col for col in cashflow_statement_flipped.columns]
+            cashflow_statement_flipped.columns = formatted_columns3
+            st.dataframe(cashflow_statement_flipped)
+            ''
+#Cashflow Statement Bar chart
+            #st.subheader("Cashflow Statement Key Values Chart", divider ='gray')
+            cashflow_items = ['Operating Cash Flow', 'Investing Cash Flow', 'Financing Cash Flow', 'Free Cash Flow']
+            cashflow_bar_data = cashflow_statement_flipped.loc[cashflow_items].transpose()
+            cashflow_bar_data_million = cashflow_bar_data / 1e6
+            cashflow_bar_data_million = cashflow_bar_data_million.reset_index().rename(columns={'index': 'Date'})
+            cashflow_bar_data_melted = cashflow_bar_data_million.melt('Date', var_name='Key Values', value_name='USD in Million')
+            cashflow_bar_data_melted['Key Values'] = pd.Categorical(cashflow_bar_data_melted['Key Values'], categories=cashflow_items, ordered=True)
+            chart = alt.Chart(cashflow_bar_data_melted).mark_bar().encode(
+                x=alt.X('Date:O', title='Date'),
+                y=alt.Y('USD in Million:Q', title='USD in Million'),
+                color=alt.Color('Key Values:N', sort=cashflow_items), 
+                xOffset=alt.XOffset('Key Values:N', sort=cashflow_items)
+            ).properties(
+                width=600,
+                height=400,
+                title='Cashflow Statement Key Values Chart'
+            ).configure_axisX(
+                labelAngle=-45
+            )
+            st.altair_chart(chart, use_container_width=True)
+            ''
 
 ############### Technical Analysis Data ###############
 
