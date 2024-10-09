@@ -179,6 +179,8 @@ def get_stock_data(ticker, apiKey=None):
     dividend_history = stock.dividends
     exDividendDate = stock.info.get('exDividendDate','N/A')
     get_earningsDate = stock.calendar['Earnings Date']
+    earnings_history = stock.earnings_history
+    eps_trend = stock.eps_trend
     if get_earningsDate:
         earningsDate = get_earningsDate[0].strftime('%Y-%m-%d')
     else:
@@ -201,7 +203,7 @@ def get_stock_data(ticker, apiKey=None):
     sa_price_float = float(sa_analysts_targetprice.replace('$', ''))
     sa_mos = ((sa_price_float - price)/sa_price_float) * 100
 
-    return earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey
+    return eps_trend, earnings_history, earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey
 
 ''
 ''
@@ -218,7 +220,7 @@ st.info('Data provided by Yahoo Finance, Morning Star, and StockAnalysis.com')
 
 if st.button("Submit"):
     try:
-        earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey = get_stock_data(ticker, apiKey if apiKey.strip() else None)
+        eps_trend, earnings_history, earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey = get_stock_data(ticker, apiKey if apiKey.strip() else None)
     
 ############### Profile ###############
 
@@ -229,25 +231,26 @@ if st.button("Submit"):
         marketCap_value = 'N/A' if marketCap == 'N/A' else f'${marketCap/1000000:,.2f}'
         col1, col2 = st.columns([2, 3])
         with col1:
-            st.markdown(f"""
-            <div style='text-align: left;'>
-                <img src='{picture_url}' width='100'>
-            </div>
-            """, unsafe_allow_html=True)
+            st.image(picture_url, use_column_width=True)
+            # st.markdown(f"""
+            # <div style='text-align: left;'>
+            #     <img src='{picture_url}' width='100'>
+            # </div>
+            # """, unsafe_allow_html=True)
         with col2:
-            st.markdown(f"""
-            <div style='float: left; width: 100%;'>
-                <table style='width: 100%;'>
-                    <tr><td><strong>Sector</strong></td><td>{sector}</td></tr>
-                    <tr><td><strong>Industry</strong></td><td>{industry}</td></tr>
-                    <tr><td><strong>Employees</strong></td><td>{employee_value}</td></tr>
-                    <tr><td><strong>Market Cap</strong></td><td>{marketCap_value} Millions</td></tr>
-                    <tr><td><strong>Country</strong></td><td>{country}</td></tr>
-                    <tr><td><strong>Website</strong></td><td>{website}</td></tr>
-                    <tr><td><strong>Earnings Date</strong></td><td>{earningsDate}</td></tr>
-                </table>
-            </div>
-            """, unsafe_allow_html=True)
+             st.markdown(f"""
+             <div style='float: left; width: 100%;'>
+                 <table style='width: 100%;'>
+                     <tr><td><strong>Sector</strong></td><td>{sector}</td></tr>
+                     <tr><td><strong>Industry</strong></td><td>{industry}</td></tr>
+                     <tr><td><strong>Employees</strong></td><td>{employee_value}</td></tr>
+                     <tr><td><strong>Market Cap</strong></td><td>{marketCap_value} Millions</td></tr>
+                     <tr><td><strong>Country</strong></td><td>{country}</td></tr>
+                     <tr><td><strong>Website</strong></td><td>{website}</td></tr>
+                     <tr><td><strong>Earnings Date</strong></td><td>{earningsDate}</td></tr>
+                 </table>
+             </div>
+             """, unsafe_allow_html=True)
 
         h_cols = st.columns(3)
         sharesOutstanding_value = 'N/A' if sharesOutstanding == 'N/A' else f'{sharesOutstanding/1000000000:,.2f}B'
@@ -441,6 +444,57 @@ if st.button("Submit"):
                     )
                     st.altair_chart(chart, use_container_width=True)
 
+#Earnings History
+            st.subheader('Earnings History', divider='gray')
+            ecol1, ecol2 = st.columns([2, 3])
+            with ecol1:
+                earnings_data = pd.DataFrame(earnings_history)
+                if 'epsEstimate' in earnings_data.columns and 'epsActual' in earnings_data.columns:
+                    earnings_data.index = earnings_data.index.astype(str)
+                    df = earnings_data.reset_index().melt(id_vars=['index'], value_vars=['epsEstimate', 'epsActual'], var_name='variable', value_name='value')
+                    bar = alt.Chart(df[df['variable'] == 'epsActual']).mark_bar().encode(
+                        x=alt.X('index:O', title='Date'),
+                        y=alt.Y('value:Q', title='Actual')
+                    ).properties(
+                        width=alt.Step(40)
+                    )
+                    tick = alt.Chart(df[df['variable'] == 'epsEstimate']).mark_tick(
+                        color='red',
+                        thickness=2,
+                        size=40 * 0.9,
+                    ).encode(
+                        x=alt.X('index:O', title='Date'),
+                        y=alt.Y('value:Q', title='Estimate')
+                    )
+                    st.altair_chart(bar + tick)
+                else:
+                    st.write("The 'epsEstimate' or 'epsActual' columns are missing from the data.")
+            with ecol2:
+                eps_data = eps_trend.loc[["0y", "+1y"], ["current", "7daysAgo", "30daysAgo", "60daysAgo", "90daysAgo"]]
+                eps_data = eps_data.T.reset_index()
+                eps_data.columns = ['TimePeriod', 'CurrentYear', 'NextYear']
+                label_map = {
+                    'current': 'Current',
+                    '7daysAgo': '7 Days Ago',
+                    '30daysAgo': '30 Days Ago',
+                    '60daysAgo': '60 Days Ago',
+                    '90daysAgo': '90 Days Ago'
+                }
+                eps_data['TimePeriod'] = eps_data['TimePeriod'].map(label_map)
+                eps_melted = pd.melt(eps_data, id_vars=['TimePeriod'], value_vars=['CurrentYear', 'NextYear'],
+                                    var_name='Year', value_name='EPS')
+                chart = alt.Chart(eps_melted).mark_line(point=True).encode(
+                    x=alt.X('TimePeriod:N', title='Time Period', sort=['90 Days Ago', '60 Days Ago', '30 Days Ago', '7 Days Ago', 'Current']),
+                    y=alt.Y('EPS:Q', title='EPS'),
+                    color='Year:N',
+                    tooltip=['TimePeriod', 'Year', 'EPS']
+                ).properties(
+                    title='EPS Trend'
+                ).configure_axisX(
+                labelAngle=-0
+                )
+                st.altair_chart(chart, use_container_width=True)
+
 #Analysts Ratings
             st.subheader('Analysts Ratings', divider='gray')
             try:
@@ -484,7 +538,7 @@ if st.button("Submit"):
                 st.write(f'Analyst Count: {sa_analysts_count}')
             ''
 
-############### Statements ###############
+############### Comparison ###############
 
         with comparison_data:
             st.write("Comparisons")
