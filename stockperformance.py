@@ -14,7 +14,7 @@ import datetime
 st.set_page_config(page_title='Stock Analysis Dashboard'
 )
 
-st.title("Stock Analysis Dashboard")
+#st.title("Stock Analysis Dashboard")
 
 @st.cache_data
 def get_stock_data(ticker, apiKey=None):
@@ -232,7 +232,7 @@ if st.button("Submit"):
         col1, col2 = st.columns([2, 3])
         with col1:
             st.image(picture_url, use_column_width=True)
-            ''
+            
             # st.markdown(f"""
             # <div style='text-align: left;'>
             #     <img src='{picture_url}' width='100'>
