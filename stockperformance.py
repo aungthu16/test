@@ -13,6 +13,7 @@ import datetime
 
 st.set_page_config(page_title='Stock Analysis Dashboard'
 )
+
 st.title("Stock Analysis Dashboard")
 
 @st.cache_data
@@ -180,6 +181,8 @@ def get_stock_data(ticker, apiKey=None):
     get_earningsDate = stock.calendar['Earnings Date']
     earnings_history = stock.earnings_history
     eps_trend = stock.eps_trend
+    growth_estimates = stock.growth_estimates
+    earnings_estimate = stock.earnings_estimate
     if get_earningsDate:
         earningsDate = get_earningsDate[0].strftime('%Y-%m-%d')
     else:
@@ -202,7 +205,7 @@ def get_stock_data(ticker, apiKey=None):
     sa_price_float = float(sa_analysts_targetprice.replace('$', ''))
     sa_mos = ((sa_price_float - price)/sa_price_float) * 100
 
-    return eps_trend, earnings_history, earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey
+    return earnings_estimate, growth_estimates, eps_trend, earnings_history, earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey
 
 ''
 ''
@@ -219,7 +222,7 @@ st.info('Data provided by Yahoo Finance, Morning Star, and StockAnalysis.com')
 
 if st.button("Submit"):
     try:
-        eps_trend, earnings_history, earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey = get_stock_data(ticker, apiKey if apiKey.strip() else None)
+        earnings_estimate, growth_estimates, eps_trend, earnings_history, earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey = get_stock_data(ticker, apiKey if apiKey.strip() else None)
     
 ############### Profile ###############
 
@@ -243,7 +246,7 @@ if st.button("Submit"):
                      <tr><td><strong>Sector</strong></td><td>{sector}</td></tr>
                      <tr><td><strong>Industry</strong></td><td>{industry}</td></tr>
                      <tr><td><strong>Employees</strong></td><td>{employee_value}</td></tr>
-                     <tr><td><strong>Market Cap</strong></td><td>{marketCap_value} Millions</td></tr>
+                     <tr><td><strong>Market Cap</strong></td><td>{marketCap_value}M</td></tr>
                      <tr><td><strong>Country</strong></td><td>{country}</td></tr>
                      <tr><td><strong>Website</strong></td><td>{website}</td></tr>
                      <tr><td><strong>Earnings Date</strong></td><td>{earningsDate}</td></tr>
@@ -485,14 +488,39 @@ if st.button("Submit"):
                 chart = alt.Chart(eps_melted).mark_line(point=True).encode(
                     x=alt.X('TimePeriod:N', title='Time Period', sort=['90 Days Ago', '60 Days Ago', '30 Days Ago', '7 Days Ago', 'Current']),
                     y=alt.Y('EPS:Q', title='EPS'),
-                    color='Year:N',
+                    color=alt.Color('Year:N', title=None),
                     tooltip=['TimePeriod', 'Year', 'EPS']
                 ).properties(
                     title='EPS Trend'
                 ).configure_axisX(
-                labelAngle=-0
+                labelAngle=0
                 )
                 st.altair_chart(chart, use_container_width=True)
+
+#Estimate Data
+            st.subheader('Growth Estimation', divider='gray')
+            gcol1, gcol2 = st.columns([3, 1])
+            with gcol1:
+                gdata = growth_estimates.loc[["-5y", "0y", "+1y", "+5y"], ["stock", "index"]] * 100
+                gdata["label"] = ['5 Years Ago', 'Current', 'Next 1 Year', 'Next 5 Years']
+                gdata = gdata.reset_index(drop=True)
+                gdata_long = pd.melt(gdata, id_vars='label', value_vars=['stock', 'index'], var_name='Category', value_name='Percentage')
+                chart = alt.Chart(gdata_long).mark_line(point=True).encode(
+                    x=alt.X('label:N', title='Time Period'),
+                    y=alt.Y('Percentage:Q', title='Growth Estimate (%)'),
+                    color=alt.Color('Category:N', title=None),
+                    tooltip=['label:N', 'Category:N', 'Percentage:Q']
+                ).properties(
+                    width=500,
+                    #height=400,
+                    title='Growth Estimates'
+                ).configure_axisX(
+                    labelAngle=0
+                )
+                st.altair_chart(chart)
+            with gcol2:
+                earnings_growth = earnings_estimate.loc['+1y', 'growth']
+                st.write("Growth for +1y:", earnings_growth)
 
 #Analysts Ratings
             st.subheader('Analysts Ratings', divider='gray')
@@ -568,14 +596,14 @@ if st.button("Submit"):
             chart = alt.Chart(income_bar_data_melted).mark_bar().encode(
                 x=alt.X('Date:O', title='Date'),
                 y=alt.Y('USD in Million:Q', title='USD in Million'),
-                color=alt.Color('Key Values:N', sort=income_items), 
+                color=alt.Color('Key Values:N', sort=income_items, legend=alt.Legend(orient='bottom'), title=None), 
                 xOffset=alt.XOffset('Key Values:N', sort=income_items)
             ).properties(
                 #width=600,
                 #height=400,
                 title='Income Statement Key Values Chart'
             ).configure_axisX(
-                labelAngle=-45
+                labelAngle=0
             )
             st.altair_chart(chart, use_container_width=True)
             ''
@@ -601,14 +629,14 @@ if st.button("Submit"):
             chart2 = alt.Chart(balance_bar_data_melted).mark_bar().encode(
                 x=alt.X('Date:O', title='Date'),
                 y=alt.Y('USD in Million:Q', title='USD in Million'),
-                color=alt.Color('Key Values:N', sort=balance_items), 
+                color=alt.Color('Key Values:N', sort=balance_items, legend=alt.Legend(orient='bottom'), title=None), 
                 xOffset=alt.XOffset('Key Values:N', sort=balance_items)
             ).properties(
                 #width=600,
                 #height=400,
                 title='Balance Sheet Key Values Chart'
             ).configure_axisX(
-                labelAngle=-45
+                labelAngle=0
             )
             st.altair_chart(chart2, use_container_width=True)
             ''
@@ -634,14 +662,14 @@ if st.button("Submit"):
             chart = alt.Chart(cashflow_bar_data_melted).mark_bar().encode(
                 x=alt.X('Date:O', title='Date'),
                 y=alt.Y('USD in Million:Q', title='USD in Million'),
-                color=alt.Color('Key Values:N', sort=cashflow_items), 
+                color=alt.Color('Key Values:N', sort=cashflow_items, legend=alt.Legend(orient='bottom'), title=None), 
                 xOffset=alt.XOffset('Key Values:N', sort=cashflow_items)
             ).properties(
                 #width=600,
                 #height=400,
                 title='Cashflow Statement Key Values Chart'
             ).configure_axisX(
-                labelAngle=-45
+                labelAngle=0
             )
             st.altair_chart(chart, use_container_width=True)
             ''
