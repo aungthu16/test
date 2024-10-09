@@ -11,9 +11,10 @@ import plotly.graph_objects as go
 import altair as alt
 import datetime
 
+#logo_url='https://drive.google.com/file/d/1x071eLRUygE0Mve7aMKtKZzQ0kw0aB43/view?usp=sharing'
 st.set_page_config(page_title='Stock Analysis Dashboard'
 )
-
+#st.image(logo_url,width=100)
 st.title("Stock Analysis Dashboard")
 
 @st.cache_data
@@ -183,6 +184,8 @@ def get_stock_data(ticker, apiKey=None):
     eps_trend = stock.eps_trend
     growth_estimates = stock.growth_estimates
     earnings_estimate = stock.earnings_estimate
+    revenue_estimate = stock.revenue_estimate
+    news = stock.news
     if get_earningsDate:
         earningsDate = get_earningsDate[0].strftime('%Y-%m-%d')
     else:
@@ -205,7 +208,7 @@ def get_stock_data(ticker, apiKey=None):
     sa_price_float = float(sa_analysts_targetprice.replace('$', ''))
     sa_mos = ((sa_price_float - price)/sa_price_float) * 100
 
-    return earnings_estimate, growth_estimates, eps_trend, earnings_history, earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey
+    return news, revenue_estimate, earnings_estimate, growth_estimates, eps_trend, earnings_history, earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey
 
 ''
 ''
@@ -222,7 +225,7 @@ st.info('Data provided by Yahoo Finance, Morning Star, and StockAnalysis.com')
 
 if st.button("Submit"):
     try:
-        earnings_estimate, growth_estimates, eps_trend, earnings_history, earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey = get_stock_data(ticker, apiKey if apiKey.strip() else None)
+        news, revenue_estimate, earnings_estimate, growth_estimates, eps_trend, earnings_history, earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey = get_stock_data(ticker, apiKey if apiKey.strip() else None)
     
 ############### Profile ###############
 
@@ -256,27 +259,21 @@ if st.button("Submit"):
 
         h_cols = st.columns(3)
         sharesOutstanding_value = 'N/A' if sharesOutstanding == 'N/A' else f'{sharesOutstanding/1000000000:,.2f}B'
-        h_cols[0].metric(
-            label='Shares Outstanding',
-            value=sharesOutstanding_value
-        )
+        h_cols[0].metric(label='Shares Outstanding', value=sharesOutstanding_value)
+
         insiderPct_value = 'N/A' if insiderPct == 'N/A' else f'{insiderPct*100:,.2f}%'
-        h_cols[1].metric(
-            label='Owned by Insiders',
-            value=insiderPct_value
-        )
+        h_cols[1].metric(label='Owned by Insiders', value=insiderPct_value)
+
         institutionsPct_value = 'N/A' if institutionsPct == 'N/A' else f'{institutionsPct*100:,.2f}%'
-        h_cols[2].metric(
-            label='Owned by Institutions',
-            value=institutionsPct_value
-        )
+        h_cols[2].metric(label='Owned by Institutions', value=institutionsPct_value)
+
         st.markdown(f"<div style='text-align: justify;'>{longProfile}</div>", unsafe_allow_html=True)
         ''
         ''
 
 ############### Tabs ###############
 
-        overview_data, comparison_data, statements_data, sustainability_data, news_data, technicalAnalysis_data = st.tabs (["Overview","Comparisons","Financial Statements","Sustainability","Top 10 news","Technical Analysis"])
+        overview_data, comparison_data, statements_data, technicalAnalysis_data, sustainability_data, news_data = st.tabs (["Overview","Comparisons","Financial Statements","Technical Analysis","Sustainability","Top News"])
 
 ############### Overview Data ###############
 
@@ -285,49 +282,29 @@ if st.button("Submit"):
 #Stock Performance
             st.subheader('Stock Performance', divider='gray')
             cols = st.columns(4)
-            cols[0].metric(
-                label='Current Price',
-                value=f'${price:,.2f}',
-                delta=f'{change_dollar:,.2f} ({change_percent:.2f}%)',
-                delta_color='normal' 
-            )
+            cols[0].metric(label='Current Price',value=f'${price:,.2f}',delta=f'{change_dollar:,.2f} ({change_percent:.2f}%)',delta_color='normal' )
+            
             eps_value = 'N/A' if eps == 'N/A' else f'{eps:,.2f}'
-            cols[1].metric(
-                label='EPS (ttm)',
-                value=eps_value
-            )
+            cols[1].metric(label='EPS (ttm)',value=eps_value)
+            
             pegRatio_value = 'N/A' if pegRatio == 'N/A' else f'{pegRatio:,.2f}'
-            cols[2].metric(
-                label='PEG Ratio',
-                value=pegRatio_value
-            )
+            cols[2].metric(label='PEG Ratio',value=pegRatio_value)
+            
             beta_value = 'N/A' if beta == 'N/A' else f'{beta:.2f}'
-            cols[3].metric(
-                label='Beta',
-                value=beta_value
-            )
+            cols[3].metric(label='Beta',value=beta_value)
 
             cols1 = st.columns(4)
             pe_value = 'N/A' if peRatio == 'N/A' else f'{peRatio:.2f}'
-            cols1[0].metric(
-                label='PE Ratio',
-                value=pe_value
-            )
+            cols1[0].metric(label='PE Ratio',value=pe_value)
+            
             forwardPe_value = 'N/A' if forwardPe == 'N/A' else f'{forwardPe:.2f}'
-            cols1[1].metric(
-                label='Forward PE',
-                value=forwardPe_value
-            )
+            cols1[1].metric(label='Forward PE',value=forwardPe_value)
+            
             pbRatio_value = 'N/A' if pbRatio == 'N/A' else f'{pbRatio:.2f}'
-            cols1[2].metric(
-                label='PB Ratio',
-                value=pbRatio_value
-            )
+            cols1[2].metric(label='PB Ratio',value=pbRatio_value)
+            
             deRatio_value = 'N/A' if deRatio == 'N/A' else f'{deRatio/100:.2f}'
-            cols1[3].metric(
-                label='DE Ratio',
-                value=deRatio_value
-            )
+            cols1[3].metric(label='DE Ratio',value=deRatio_value)
             ''
             if apiKey is None:
                 #st.markdown("---")
@@ -372,32 +349,18 @@ if st.button("Submit"):
                 st.caption("This section only works with RapidAPI key.")
                 cols = st.columns(3)
                 quant_rating_value = 'N/A' if quant_rating == 'N/A' else f'{quant_rating:.2f}'
-                cols[0].metric(
-                    label='Quant Rating',
-                    value=quant_rating_value
-                )
-                cols[1].metric(
-                    label='Growth Grade',
-                    value=growth_grade
-                )
-                cols[2].metric(
-                    label='Momentum Grade',
-                    value=momentum_grade
-                )
+                cols[0].metric(label='Quant Rating',value=quant_rating_value)
+                
+                cols[1].metric(label='Growth Grade',value=growth_grade)
+                
+                cols[2].metric(label='Momentum Grade',value=momentum_grade)
 
                 cols = st.columns(3)
-                cols[0].metric(
-                    label='Profitability Grade',
-                    value=profitability_grade
-                )
-                cols[1].metric(
-                    label='Value Grade',
-                    value=value_grade
-                )
-                cols[2].metric(
-                    label='Yield on Cost Grade',
-                    value=yield_on_cost_grade
-                )
+                cols[0].metric(label='Profitability Grade',value=profitability_grade)
+                
+                cols[1].metric(label='Value Grade',value=value_grade)
+                
+                cols[2].metric(label='Yield on Cost Grade',value=yield_on_cost_grade)
                 ''
 
 #Dividend data
@@ -408,36 +371,28 @@ if st.button("Submit"):
                 col1, col2 = st.columns([1, 3])
                 with col1:
                     dividends_value = 'N/A' if dividends == 'N/A' else f'${dividends:,.2f}'
-                    st.metric(
-                        label='Dividend per share',
-                        value=dividends_value
-                    )
+                    st.metric(label='Dividend per share',value=dividends_value)
+                    
                     dividendYield_value = 'N/A' if dividendYield == 'N/A' else f'{dividendYield*100:.2f}%'
-                    st.metric(
-                        label='Dividend Yield',
-                        value=dividendYield_value
-                    )
+                    st.metric(label='Dividend Yield',value=dividendYield_value)
+                    
                     payoutRatio_value = 'N/A' if payoutRatio == 'N/A' else f'{payoutRatio:.2f}'
-                    st.metric(
-                        label='Payout Ratio',
-                        value=payoutRatio_value
-                    )
+                    st.metric(label='Payout Ratio',value=payoutRatio_value)
+
                     if exDividendDate == 'N/A':
                         exDividendDate_value = 'N/A'
                     else:
                         exDate = datetime.datetime.fromtimestamp(exDividendDate)
                         exDividendDate_value = exDate.strftime('%Y-%m-%d')
-                    st.metric(
-                        label='Ex-Dividend Date',
-                        value=exDividendDate_value
-                    )
+                    st.metric(label='Ex-Dividend Date',value=exDividendDate_value)
+
                 with col2:
                     data_yearly = dividend_history.resample('Y').sum().reset_index()
                     data_yearly['Year'] = data_yearly['Date'].dt.year
                     data_yearly = data_yearly[['Year', 'Dividends']]
                     if dividends != 'N/A':
                         data_yearly.loc[data_yearly.index[-1], 'Dividends'] = dividends
-                    chart = alt.Chart(data_yearly).mark_bar().encode(
+                    chart = alt.Chart(data_yearly).mark_bar(color='#3BAFDA').encode(
                         x=alt.X('Year:O', title='Year'), 
                         y=alt.Y('Dividends', title='Dividends (USD)'),
                         tooltip=['Year:O', 'Dividends']
@@ -454,7 +409,7 @@ if st.button("Submit"):
                 if 'epsEstimate' in earnings_data.columns and 'epsActual' in earnings_data.columns:
                     earnings_data.index = earnings_data.index.astype(str)
                     df = earnings_data.reset_index().melt(id_vars=['index'], value_vars=['epsEstimate', 'epsActual'], var_name='variable', value_name='value')
-                    bar = alt.Chart(df[df['variable'] == 'epsActual']).mark_bar().encode(
+                    bar = alt.Chart(df[df['variable'] == 'epsActual']).mark_bar(color='#FFCE54').encode(
                         x=alt.X('index:O', title='Date'),
                         y=alt.Y('value:Q', title='Actual')
                     ).properties(
@@ -488,7 +443,7 @@ if st.button("Submit"):
                 chart = alt.Chart(eps_melted).mark_line(point=True).encode(
                     x=alt.X('TimePeriod:N', title='Time Period', sort=['90 Days Ago', '60 Days Ago', '30 Days Ago', '7 Days Ago', 'Current']),
                     y=alt.Y('EPS:Q', title='EPS'),
-                    color=alt.Color('Year:N', title=None),
+                    color=alt.Color('Year:N', title=None, scale=alt.Scale(domain=['CurrentYear', 'NextYear'], range=['#9678DC', '#D772AD'])),
                     tooltip=['TimePeriod', 'Year', 'EPS']
                 ).properties(
                     title='EPS Trend'
@@ -508,19 +463,31 @@ if st.button("Submit"):
                 chart = alt.Chart(gdata_long).mark_line(point=True).encode(
                     x=alt.X('label:N', title='Time Period'),
                     y=alt.Y('Percentage:Q', title='Growth Estimate (%)'),
-                    color=alt.Color('Category:N', title=None),
+                    color=alt.Color('Category:N', title=None, scale=alt.Scale(domain=['stock', 'index'], range=['#48CFAD', '#FFCE54'])),
                     tooltip=['label:N', 'Category:N', 'Percentage:Q']
                 ).properties(
                     width=500,
                     #height=400,
-                    title='Growth Estimates'
                 ).configure_axisX(
                     labelAngle=0
                 )
                 st.altair_chart(chart)
             with gcol2:
                 earnings_growth = earnings_estimate.loc['+1y', 'growth']
-                st.write("Growth for +1y:", earnings_growth)
+                revenue_growth = revenue_estimate.loc['+1y', 'growth']
+                if earnings_growth and earnings_growth!='NaN' and earnings_growth!=None:
+                    earnings_growth_value = f'{earnings_growth*100:.2f}%'
+                else:
+                    earnings_growth_value = 'N/A'
+                st.metric(label='Next Year Earnings Growth',value=earnings_growth_value)
+
+                if revenue_growth and revenue_growth!='NaN' and revenue_growth!=None:
+                    revenue_growth_value = f'{revenue_growth*100:.2f}%'
+                else:
+                    revenue_growth_value = 'N/A'
+                st.metric(label='Next Year Revenue Growth',value=revenue_growth_value)
+
+                st.caption("Please note that estimated data may not always be accurate and should not be solely relied upon for making investment decisions.")
 
 #Analysts Ratings
             st.subheader('Analysts Ratings', divider='gray')
@@ -546,6 +513,7 @@ if st.button("Submit"):
                 st.write(f'% Difference: {yf_mos_value}')
                 st.write(f'Analyst Consensus: {yf_consensus}')
                 st.write(f'Analyst Count: {yf_analysts_count}')
+                ''
             
             sk_targetprice_fix = 'N/A' if sk_targetprice == 'N/A' else f'${float(sk_targetprice):.2f}'
             sk_targetprice_mos ='N/A' if sk_targetprice =='N/A' else f'{((float(sk_targetprice) - price)/float(sk_targetprice)) * 100:.2f}%'
@@ -555,6 +523,7 @@ if st.button("Submit"):
                 st.write(f'% Difference: {sk_targetprice_mos}')
                 st.write(f'Analyst Consensus: {largest_count_type}')
                 st.write(f'Analyst Count: {largest_value}')
+                ''
 
             sa_mos_value = 'N/A' if sa_mos == 'N/A' else f'{sa_mos:.2f}%'
             with col3:
@@ -563,6 +532,7 @@ if st.button("Submit"):
                 st.write(f'% Difference: {sa_mos_value}')
                 st.write(f'Analyst Consensus: {sa_analysts_consensus}')
                 st.write(f'Analyst Count: {sa_analysts_count}')
+                ''
             ''
 
 ############### Comparison ###############
@@ -596,11 +566,11 @@ if st.button("Submit"):
             chart = alt.Chart(income_bar_data_melted).mark_bar().encode(
                 x=alt.X('Date:O', title='Date'),
                 y=alt.Y('USD in Million:Q', title='USD in Million'),
-                color=alt.Color('Key Values:N', sort=income_items, legend=alt.Legend(orient='bottom'), title=None), 
+                color=alt.Color('Key Values:N', sort=income_items, title=None, scale=alt.Scale(domain=['Total Revenue', 'Gross Profit', 'Operating Income', 'Net Income', 'EBITDA'], range=['#ED5565', '#EC87C0', '#FFCE54', '#AC92EC', '#4FC1E9' ])), 
                 xOffset=alt.XOffset('Key Values:N', sort=income_items)
             ).properties(
-                #width=600,
-                #height=400,
+                width=600,
+                height=400,
                 title='Income Statement Key Values Chart'
             ).configure_axisX(
                 labelAngle=0
@@ -629,11 +599,11 @@ if st.button("Submit"):
             chart2 = alt.Chart(balance_bar_data_melted).mark_bar().encode(
                 x=alt.X('Date:O', title='Date'),
                 y=alt.Y('USD in Million:Q', title='USD in Million'),
-                color=alt.Color('Key Values:N', sort=balance_items, legend=alt.Legend(orient='bottom'), title=None), 
+                color=alt.Color('Key Values:N', sort=balance_items, title=None, scale=alt.Scale(domain=['Cash And Cash Equivalents','Total Assets', 'Total Liabilities Net Minority Interest', 'Stockholders Equity'], range=['#FFCE54', '#5F9BEB', '#FB6E51', '#48CFAD' ])), 
                 xOffset=alt.XOffset('Key Values:N', sort=balance_items)
             ).properties(
-                #width=600,
-                #height=400,
+                width=600,
+                height=400,
                 title='Balance Sheet Key Values Chart'
             ).configure_axisX(
                 labelAngle=0
@@ -662,11 +632,11 @@ if st.button("Submit"):
             chart = alt.Chart(cashflow_bar_data_melted).mark_bar().encode(
                 x=alt.X('Date:O', title='Date'),
                 y=alt.Y('USD in Million:Q', title='USD in Million'),
-                color=alt.Color('Key Values:N', sort=cashflow_items, legend=alt.Legend(orient='bottom'), title=None), 
+                color=alt.Color('Key Values:N', sort=cashflow_items, title=None, scale=alt.Scale(domain=['Operating Cash Flow', 'Investing Cash Flow', 'Financing Cash Flow', 'Free Cash Flow'], range=['#8CC152', '#ED5565', '#FB6E51', '#48CFAD' ])), 
                 xOffset=alt.XOffset('Key Values:N', sort=cashflow_items)
             ).properties(
-                #width=600,
-                #height=400,
+                width=600,
+                height=400,
                 title='Cashflow Statement Key Values Chart'
             ).configure_axisX(
                 labelAngle=0
@@ -710,10 +680,10 @@ if st.button("Submit"):
                         'axis': {'range': [None, max_value]},
                         'bar': {'color': "blue"},
                         'steps': [
-                            {'range': [0, max_value * 0.25], 'color': "lightgray"},
-                            {'range': [max_value * 0.25, max_value * 0.5], 'color': "yellow"},
-                            {'range': [max_value * 0.5, max_value * 0.75], 'color': "orange"},
-                            {'range': [max_value * 0.75, max_value], 'color': "red"},
+                            {'range': [0, max_value * 0.25], 'color': "#CCD1D9"},
+                            {'range': [max_value * 0.25, max_value * 0.5], 'color': "#FFCE54"},
+                            {'range': [max_value * 0.5, max_value * 0.75], 'color': "#FB6E51"},
+                            {'range': [max_value * 0.75, max_value], 'color': "#ED5565"},
                         ],
                     }
                 ))
@@ -730,22 +700,14 @@ if st.button("Submit"):
             
 #Risk Scores
             esgcol1 = st.columns(3)
-            esgcol1[0].metric(
-                label='Environmental Risk',
-                value=enviScore
-            )
-            esgcol1[1].metric(
-                label='Social Risk',
-                value=socialScore
-            )
-            esgcol1[2].metric(
-                label='Governance Risk',
-                value=governScore
-            )
+            esgcol1[0].metric(label='Environmental Risk',value=enviScore)
+
+            esgcol1[1].metric(label='Social Risk',value=socialScore)
+
+            esgcol1[2].metric(label='Governance Risk',value=governScore)
             ''
 #Descriptions
             st.caption("Notes:")
-            ''
             st.caption("Total ESG Risk: Companies with ESG scores closer to 100 are considered to have significant ESG-related risks and challenges that could potentially harm their long-term sustainability.")
             st.caption("Environmental Risk: This reflects the company’s impact on the environment. e.g. carbon emissions, waste management, energy efficiency.")
             st.caption("Social Risk: This measures the company’s relationships with employees, suppliers, customers, and the community. e.g. human rights, labor practices, diversity, and community engagement.")
@@ -754,9 +716,24 @@ if st.button("Submit"):
 ############### News Data ###############
 
         with news_data:
-            st.subheader("News", divider = 'gray')
-            st.write(f'{name}')
-            st.write(f'{ticker}')
+            st.subheader("Latest News", divider = 'gray')
+            for news_item in news:
+                title = news_item.get('title', 'No Title')
+                publisher = news_item.get('publisher', 'No Publisher')
+                link = news_item.get('link', '#')
+                provider_publish_time = news_item.get('providerPublishTime', 0)
+                publish_time = datetime.datetime.utcfromtimestamp(provider_publish_time).strftime('%Y-%m-%d %H:%M:%S')
+                thumbnails = news_item.get('thumbnail', {}).get('resolutions', [])
+                thumbnail_url = thumbnails[0]['url'] if thumbnails else None
+                
+                if thumbnail_url:
+                    st.image(thumbnail_url, width=200) 
+                st.subheader(f"{title}")
+                st.write(f"**Publisher**: {publisher}")
+                st.write(f"**Link**: [Read more from this link]({link})")
+                st.write(f"**Published on**: {publish_time}")
+                st.write("---")
+
             ''
 
     except Exception as e:
