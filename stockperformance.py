@@ -387,7 +387,7 @@ if st.button("Submit"):
                     st.metric(label='Ex-Dividend Date',value=exDividendDate_value)
 
                 with col2:
-                    data_yearly = dividend_history.resample('Y').sum().reset_index()
+                    data_yearly = dividend_history.resample('YE').sum().reset_index()
                     data_yearly['Year'] = data_yearly['Date'].dt.year
                     data_yearly = data_yearly[['Year', 'Dividends']]
                     if dividends != 'N/A':
@@ -648,19 +648,8 @@ if st.button("Submit"):
 
         with technicalAnalysis_data:
             st.subheader("Price Data", divider ='gray')
-            """
-            col1, col2 = st.columns([3, 3])
-            with col1:    
-                start_date = st.date_input('Start Date')
-            with col2:
-                end_date = st.date_input('End date')
-            data = yf.download(ticker, start=start_date,end=end_date)
-            fig = px.line(data, x = data.index, y=data['Adj close'],title = ticker)
-            st.plotly_chart(fig) 
-            """
-            #df = pd.DataFrame()
-            #ind_list = df.ta.indicators(as_list=True)
-            #st.write(ind_list)
+            st.image(f'https://finviz.com/chart.ashx?t={ticker}')
+            st.caption("Chart picture is obtained from finviz.com.")
         
 ############### Sustainability Data ###############
 
@@ -722,7 +711,7 @@ if st.button("Submit"):
                 publisher = news_item.get('publisher', 'No Publisher')
                 link = news_item.get('link', '#')
                 provider_publish_time = news_item.get('providerPublishTime', 0)
-                publish_time = datetime.datetime.utcfromtimestamp(provider_publish_time).strftime('%Y-%m-%d %H:%M:%S')
+                publish_time = datetime.datetime.fromtimestamp(provider_publish_time, datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
                 thumbnails = news_item.get('thumbnail', {}).get('resolutions', [])
                 thumbnail_url = thumbnails[0]['url'] if thumbnails else None
                 
