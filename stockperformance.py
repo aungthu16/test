@@ -12,8 +12,7 @@ import altair as alt
 import datetime
 
 #logo_url='https://drive.google.com/file/d/1x071eLRUygE0Mve7aMKtKZzQ0kw0aB43/view?usp=sharing'
-st.set_page_config(page_title='Stock Analysis Dashboard'
-)
+st.set_page_config(page_title='Stock Analysis Dashboard', layout='wide')
 #st.image(logo_url,width=100)
 st.title("Stock Analysis Dashboard")
 
@@ -185,6 +184,8 @@ def get_stock_data(ticker, apiKey=None):
     growth_estimates = stock.growth_estimates
     earnings_estimate = stock.earnings_estimate
     revenue_estimate = stock.revenue_estimate
+    roe = stock.info.get('returnOnEquity','N/A')
+    revenue_growth_current = stock.info.get('revenueGrowth','N/A')
     news = stock.news
     if get_earningsDate:
         earningsDate = get_earningsDate[0].strftime('%Y-%m-%d')
@@ -208,14 +209,14 @@ def get_stock_data(ticker, apiKey=None):
     sa_price_float = float(sa_analysts_targetprice.replace('$', ''))
     sa_mos = ((sa_price_float - price)/sa_price_float) * 100
 
-    return news, revenue_estimate, earnings_estimate, growth_estimates, eps_trend, earnings_history, earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey
+    return roe, revenue_growth_current, news, revenue_estimate, earnings_estimate, growth_estimates, eps_trend, earnings_history, earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey
 
 ''
 ''
 
 ############### Inputs ###############
 
-input_col1, input_col2 = st.columns([1, 3])
+input_col1, input_col2, input_col3, input_col4 = st.columns([1, 2, 2, 2])
 with input_col1:
     ticker = st.text_input("Enter US Stock Ticker:", "AAPL")
 with input_col2:
@@ -225,7 +226,7 @@ st.info('Data provided by Yahoo Finance, Morning Star, and StockAnalysis.com')
 
 if st.button("Submit"):
     try:
-        news, revenue_estimate, earnings_estimate, growth_estimates, eps_trend, earnings_history, earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey = get_stock_data(ticker, apiKey if apiKey.strip() else None)
+        roe, revenue_growth_current, news, revenue_estimate, earnings_estimate, growth_estimates, eps_trend, earnings_history, earningsDate, exDividendDate, dividend_history, pbRatio, deRatio, dividends, ticker, authors_strongsell_count, authors_strongbuy_count, authors_sell_count, authors_hold_count, authors_buy_count, authors_rating, authors_count, assessment, sk_targetprice, quant_rating, growth_grade, momentum_grade, profitability_grade, value_grade, yield_on_cost_grade, sharesOutstanding, institutionsPct, insiderPct, totalEsg, enviScore, socialScore, governScore, percentile, price, change_percent, change_dollar, beta, name, sector, industry, employee, marketCap, longProfile, eps, pegRatio, picture_url, country, sa_analysts_consensus, sa_analysts_targetprice, sa_analysts_count, yf_targetprice, yf_consensus, yf_analysts_count, website, peRatio, forwardPe, dividendYield, payoutRatio, performance_id, fair_value, fvDate, moat, moatDate, starRating, yf_mos, sa_mos, apiKey = get_stock_data(ticker, apiKey if apiKey.strip() else None)
     
 ############### Profile ###############
 
@@ -234,15 +235,23 @@ if st.button("Submit"):
         ''
         employee_value = 'N/A' if employee == 'N/A' else f'{employee:,}'
         marketCap_value = 'N/A' if marketCap == 'N/A' else f'${marketCap/1000000:,.2f}'
-        col1, col2 = st.columns([2, 3])
+        col1, col2, col3 = st.columns([2, 1, 3])
         with col1:
-            st.image(picture_url, use_column_width=True)
-            # st.markdown(f"""
-            # <div style='text-align: left;'>
-            #     <img src='{picture_url}' width='100'>
-            # </div>
-            # """, unsafe_allow_html=True)
+            st.image(picture_url, width= 250)
+
         with col2:
+            sharesOutstanding_value = 'N/A' if sharesOutstanding == 'N/A' else f'{sharesOutstanding/1000000000:,.2f}B'
+            st.metric(label='Shares Outstanding', value=sharesOutstanding_value)
+
+            insiderPct_value = 'N/A' if insiderPct == 'N/A' else f'{insiderPct*100:,.2f}%'
+            st.metric(label='Owned by Insiders', value=insiderPct_value)
+
+            institutionsPct_value = 'N/A' if institutionsPct == 'N/A' else f'{institutionsPct*100:,.2f}%'
+            st.metric(label='Owned by Institutions', value=institutionsPct_value)
+
+        st.markdown(f"<div style='text-align: justify;'>{longProfile}</div>", unsafe_allow_html=True)
+
+        with col3:
              st.markdown(f"""
              <div style='float: left; width: 100%;'>
                  <table style='width: 100%;'>
@@ -256,18 +265,6 @@ if st.button("Submit"):
                  </table>
              </div>
              """, unsafe_allow_html=True)
-
-        h_cols = st.columns(3)
-        sharesOutstanding_value = 'N/A' if sharesOutstanding == 'N/A' else f'{sharesOutstanding/1000000000:,.2f}B'
-        h_cols[0].metric(label='Shares Outstanding', value=sharesOutstanding_value)
-
-        insiderPct_value = 'N/A' if insiderPct == 'N/A' else f'{insiderPct*100:,.2f}%'
-        h_cols[1].metric(label='Owned by Insiders', value=insiderPct_value)
-
-        institutionsPct_value = 'N/A' if institutionsPct == 'N/A' else f'{institutionsPct*100:,.2f}%'
-        h_cols[2].metric(label='Owned by Institutions', value=institutionsPct_value)
-
-        st.markdown(f"<div style='text-align: justify;'>{longProfile}</div>", unsafe_allow_html=True)
         ''
         ''
 
@@ -281,7 +278,7 @@ if st.button("Submit"):
 
 #Stock Performance
             st.subheader('Stock Performance', divider='gray')
-            cols = st.columns(4)
+            cols = st.columns(5)
             cols[0].metric(label='Current Price',value=f'${price:,.2f}',delta=f'{change_dollar:,.2f} ({change_percent:.2f}%)',delta_color='normal' )
             
             eps_value = 'N/A' if eps == 'N/A' else f'{eps:,.2f}'
@@ -293,7 +290,10 @@ if st.button("Submit"):
             beta_value = 'N/A' if beta == 'N/A' else f'{beta:.2f}'
             cols[3].metric(label='Beta',value=beta_value)
 
-            cols1 = st.columns(4)
+            roe_value = 'N/A' if roe == 'N/A' else f'{roe*100:.2f}%'
+            cols[4].metric(label='ROE',value=roe_value)
+
+            cols1 = st.columns(5)
             pe_value = 'N/A' if peRatio == 'N/A' else f'{peRatio:.2f}'
             cols1[0].metric(label='PE Ratio',value=pe_value)
             
@@ -305,6 +305,9 @@ if st.button("Submit"):
             
             deRatio_value = 'N/A' if deRatio == 'N/A' else f'{deRatio/100:.2f}'
             cols1[3].metric(label='DE Ratio',value=deRatio_value)
+
+            revenue_growth_current_value = 'N/A' if revenue_growth_current == 'N/A' else f'{revenue_growth_current*100:.2f}%'
+            cols1[4].metric(label='Revenue Growth',value=revenue_growth_current_value)
             ''
             if apiKey is None:
                 #st.markdown("---")
@@ -403,9 +406,9 @@ if st.button("Submit"):
 
 #Earnings History
             st.subheader('Earnings History', divider='gray')
-            ecol1, ecol2 = st.columns([2, 3])
+            ecol1, ecol2, ecol3 = st.columns([2, 2, 3])
+            earnings_data = pd.DataFrame(earnings_history)
             with ecol1:
-                earnings_data = pd.DataFrame(earnings_history)
                 if 'epsEstimate' in earnings_data.columns and 'epsActual' in earnings_data.columns:
                     earnings_data.index = earnings_data.index.astype(str)
                     df = earnings_data.reset_index().melt(id_vars=['index'], value_vars=['epsEstimate', 'epsActual'], var_name='variable', value_name='value')
@@ -413,12 +416,14 @@ if st.button("Submit"):
                         x=alt.X('index:O', title='Date'),
                         y=alt.Y('value:Q', title='Actual')
                     ).properties(
-                        width=alt.Step(40)
+                        #width = 400,
+                        height = 300,
+                        width=alt.Step(60)
                     )
                     tick = alt.Chart(df[df['variable'] == 'epsEstimate']).mark_tick(
                         color='red',
-                        thickness=2,
-                        size=40 * 0.9,
+                        thickness=3,
+                        size=60 * 0.9,
                     ).encode(
                         x=alt.X('index:O', title='Date'),
                         y=alt.Y('value:Q', title='Estimate')
@@ -426,7 +431,26 @@ if st.button("Submit"):
                     st.altair_chart(bar + tick)
                 else:
                     st.write("The 'epsEstimate' or 'epsActual' columns are missing from the data.")
+            
             with ecol2:
+                last_eps_difference = earnings_data['epsDifference'].iloc[-1]
+                last_eps_actual = earnings_data['epsActual'].iloc[-1]
+                last_eps_estimate = earnings_data['epsEstimate'].iloc[-1]
+                st.metric(label='EPS Actual (last value)', value=f'${last_eps_actual}')
+                st.metric(label='EPS Estimate (last value)', value=f'${last_eps_estimate}')
+                if last_eps_difference < 0:
+                    st.markdown(''':red[Last Earnings Missed!]''')
+                    st.caption("The last actual EPS data missed the estimate EPS data.")
+                elif last_eps_difference == 0:
+                    st.write("Last Earnings hit!")
+                    st.caption("The last actual EPS data hit the estimate EPS data.")
+                elif last_eps_difference > 0:
+                    st.markdown(''':green[Last Earnings Beat!]''')
+                    st.caption("The last actual EPS data exceeded the estimate EPS data.")
+                else:
+                    st.caption("No EPS data.")
+            
+            with ecol3:
                 eps_data = eps_trend.loc[["0y", "+1y"], ["current", "7daysAgo", "30daysAgo", "60daysAgo", "90daysAgo"]]
                 eps_data = eps_data.T.reset_index()
                 eps_data.columns = ['TimePeriod', 'CurrentYear', 'NextYear']
@@ -446,6 +470,7 @@ if st.button("Submit"):
                     color=alt.Color('Year:N', title=None, scale=alt.Scale(domain=['CurrentYear', 'NextYear'], range=['#9678DC', '#D772AD'])),
                     tooltip=['TimePeriod', 'Year', 'EPS']
                 ).properties(
+                    height = 300,
                     title='EPS Trend'
                 ).configure_axisX(
                 labelAngle=0
@@ -454,7 +479,7 @@ if st.button("Submit"):
 
 #Estimate Data
             st.subheader('Growth Estimation', divider='gray')
-            gcol1, gcol2 = st.columns([3, 1])
+            gcol1, gcol2 = st.columns([3, 2])
             with gcol1:
                 gdata = growth_estimates.loc[["-5y", "0y", "+1y", "+5y"], ["stock", "index"]] * 100
                 gdata["label"] = ['5 Years Ago', 'Current', 'Next 1 Year', 'Next 5 Years']
@@ -466,27 +491,45 @@ if st.button("Submit"):
                     color=alt.Color('Category:N', title=None, scale=alt.Scale(domain=['stock', 'index'], range=['#48CFAD', '#FFCE54'])),
                     tooltip=['label:N', 'Category:N', 'Percentage:Q']
                 ).properties(
-                    width=500,
-                    #height=400,
+                    width=600,
+                    height=300,
                 ).configure_axisX(
                     labelAngle=0
                 )
                 st.altair_chart(chart)
+            
             with gcol2:
-                earnings_growth = earnings_estimate.loc['+1y', 'growth']
-                revenue_growth = revenue_estimate.loc['+1y', 'growth']
-                if earnings_growth and earnings_growth!='NaN' and earnings_growth!=None:
-                    earnings_growth_value = f'{earnings_growth*100:.2f}%'
+                sub_gcol1 = st.columns(2)
+                earnings_growth_nextq = earnings_estimate.loc['+1q', 'growth']
+                revenue_growth_nextq = revenue_estimate.loc['+1q', 'growth']
+                if earnings_growth_nextq and earnings_growth_nextq!='NaN' and earnings_growth_nextq!=None:
+                    earnings_growth__nextq_value = f'{earnings_growth_nextq*100:.2f}%'
                 else:
-                    earnings_growth_value = 'N/A'
-                st.metric(label='Next Year Earnings Growth',value=earnings_growth_value)
+                    earnings_growth__nextq_value = 'N/A'
+                sub_gcol1[0].metric(label='Next Quarter Earnings Growth',value=earnings_growth__nextq_value)
 
-                if revenue_growth and revenue_growth!='NaN' and revenue_growth!=None:
-                    revenue_growth_value = f'{revenue_growth*100:.2f}%'
+                if revenue_growth_nextq and revenue_growth_nextq!='NaN' and revenue_growth_nextq!=None:
+                    revenue_growth__nextq_value = f'{revenue_growth_nextq*100:.2f}%'
                 else:
-                    revenue_growth_value = 'N/A'
-                st.metric(label='Next Year Revenue Growth',value=revenue_growth_value)
+                    revenue_growth__nextq_value = 'N/A'
+                sub_gcol1[1].metric(label='Next Quarter Revenue Growth',value=revenue_growth__nextq_value)
 
+                sub_gcol2 = st.columns(2)
+                earnings_growth_nexty = earnings_estimate.loc['+1y', 'growth']
+                revenue_growth_nexty = revenue_estimate.loc['+1y', 'growth']
+                if earnings_growth_nexty and earnings_growth_nexty!='NaN' and earnings_growth_nexty!=None:
+                    earnings_growth__nexty_value = f'{earnings_growth_nexty*100:.2f}%'
+                else:
+                    earnings_growth__nexty_value = 'N/A'
+                sub_gcol2[0].metric(label='Next Year Earnings Growth',value=earnings_growth__nexty_value)
+
+                if revenue_growth_nexty and revenue_growth_nexty!='NaN' and revenue_growth_nexty!=None:
+                    revenue_growth__nexty_value = f'{revenue_growth_nexty*100:.2f}%'
+                else:
+                    revenue_growth__nexty_value = 'N/A'
+                sub_gcol2[1].metric(label='Next Year Revenue Growth',value=revenue_growth__nexty_value)
+
+                st.caption("The growth estimation data is sourced from Yahoo Finance.")
                 st.caption("Please note that estimated data may not always be accurate and should not be solely relied upon for making investment decisions.")
 
 #Analysts Ratings
@@ -643,13 +686,19 @@ if st.button("Submit"):
             )
             st.altair_chart(chart, use_container_width=True)
             ''
+#Financial Ratios
+
+            url = f'https://stockanalysis.com/stocks/{ticker}/financials/ratios/'
+            
 
 ############### Technical Analysis Data ###############
 
         with technicalAnalysis_data:
             st.subheader("Price Data", divider ='gray')
-            st.image(f'https://finviz.com/chart.ashx?t={ticker}')
-            st.caption("Chart picture is obtained from finviz.com.")
+            pcol1, pcol2, pcol3 = st.columns ([0.5,3,0.5])
+            with pcol2:
+                st.image(f'https://finviz.com/chart.ashx?t={ticker}')
+                st.caption("Chart picture is obtained from finviz.com.")
         
 ############### Sustainability Data ###############
 
@@ -678,23 +727,23 @@ if st.button("Submit"):
                 ))
                 gauge.update_layout(
                     autosize=False,
-                    width=300,  
-                    height=200, 
+                    width=400,  
+                    height=300, 
                     margin={'l': 50, 'r': 50, 't': 10, 'b': 0} 
                 )
                 st.plotly_chart(gauge)
-            left_column, middle_column, right_column = st.columns([1, 3, 1])
-            with middle_column:
+            gauge_pcol1, gauge_pcol2= st.columns ([2,3])
+            with gauge_pcol1:
                 plot_gauge()
-            
 #Risk Scores
-            esgcol1 = st.columns(3)
-            esgcol1[0].metric(label='Environmental Risk',value=enviScore)
-
-            esgcol1[1].metric(label='Social Risk',value=socialScore)
-
-            esgcol1[2].metric(label='Governance Risk',value=governScore)
-            ''
+            with gauge_pcol2:
+                st.metric(label='Environmental Risk',value=enviScore)
+                st.metric(label='Social Risk',value=socialScore)
+                st.metric(label='Governance Risk',value=governScore)
+            if enviScore == socialScore == governScore == 'N/A':
+                    st.markdown(''':red[No ESG Data.]''')
+            else:
+                ''
 #Descriptions
             st.caption("Notes:")
             st.caption("Total ESG Risk: Companies with ESG scores closer to 100 are considered to have significant ESG-related risks and challenges that could potentially harm their long-term sustainability.")
